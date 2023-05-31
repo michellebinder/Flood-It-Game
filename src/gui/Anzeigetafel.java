@@ -8,7 +8,7 @@ public class Anzeigetafel extends JPanel {
 
     public Anzeigetafel(Frame f) {
 
-        setBackground(Color.BLUE);
+        setBackground(Color.WHITE);
     }
 
 }

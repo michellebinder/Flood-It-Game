@@ -12,7 +12,7 @@ public class Frame extends JFrame {
     public Frame() {
         // Set the size and minimum size of the JFrame
         setSize(new Dimension(600, 600));
-        setMinimumSize(new Dimension(400, 400));
+        setMinimumSize(new Dimension(600, 600));
 
         anzeigetafel = new Anzeigetafel(this);
         menuetafel = new Menuetafel(anzeigetafel, this);

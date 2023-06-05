@@ -3,11 +3,18 @@ package gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
+import logic.Board;
+
 public class Menuetafel extends JPanel {
 
+    private Anzeigetafel anzeigetafel;
+    public static Board board;
     private JButton bedienungsanleitung_btn;
 
     private JButton start_btn;
@@ -43,10 +50,15 @@ public class Menuetafel extends JPanel {
     private JLabel timer_lbl;
     LineBorder line;
 
-    public Menuetafel(Anzeigetafel a, Frame f) {
+    public Menuetafel(Frame f) {
 
         setBackground(Color.lightGray);
+
         setLayout(new GridLayout(17, 1));
+
+        anzeigetafel = new Anzeigetafel(f, board);
+
+        board = new Board(selected_num_of_rows, selected_num_of_cols);
 
         bedienungsanleitung_btn = new JButton("Bedienungsanleitung");
         start_btn = new JButton("Start");
@@ -84,6 +96,15 @@ public class Menuetafel extends JPanel {
         time_lbl.setBackground(Color.white);
         time_lbl.setBorder(line);
 
+        f.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents(f);
+            }
+        });
+
+        resizeComponents(f);
+
         bedienungsanleitung_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -96,10 +117,13 @@ public class Menuetafel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 // If the Start button is clicked, change its text to "Stop"
                 if (start_btn.getText().equals("Start")) {
+
                     start_btn.setText("Stop");
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
+                    // anzeigetafel.setDrawBoard(false);
+                    anzeigetafel.repaint();
                 }
             }
         });
@@ -245,4 +269,25 @@ public class Menuetafel extends JPanel {
         pc_strategy_lbl.setEnabled(true);
         pc_strategy_dropdown.setEnabled(true);
     }
+
+    public static Board getBoard() {
+        return board;
+    }
+
+    public static void setBoard(Board board) {
+        Menuetafel.board = board;
+    }
+
+    private void resizeComponents(Frame f) {
+        int width = (int) (f.getWidth() * 0.3);
+        int height = f.getHeight();
+        setPreferredSize(new Dimension(width, height));
+        revalidate();
+        repaint();
+
+        anzeigetafel.setPreferredSize(new Dimension((int) (f.getWidth() * 0.7), f.getHeight()));
+        anzeigetafel.revalidate();
+        anzeigetafel.repaint();
+    }
+
 }

@@ -1,5 +1,7 @@
 package logic;
 
+import java.awt.Color;
+
 /*
  * Siehe Hinweise zu Umgang mit dem Repository auf Aufgabenblatt.  
  */
@@ -9,18 +11,14 @@ public class Field {
 	private int color;
 	private int row;
 	private int col;
-	
+
 	public Field(int row, int col, int color) {
-		this.row = row; 
-		this.col = col; 
-		this.color = color;  
-	
-	
+		this.row = row;
+		this.col = col;
+		this.color = color;
+
 	}
 
-	
-	
-	
 	/*
 	 * Getter und Setter
 	 */
@@ -47,7 +45,5 @@ public class Field {
 	public void setCol(int col) {
 		this.col = col;
 	}
-
-	
 
 }

@@ -4,6 +4,8 @@ import java.awt.*;
 
 import javax.swing.JFrame;
 
+import logic.Board;
+
 public class Frame extends JFrame {
 
     private Menuetafel menuetafel;
@@ -14,12 +16,11 @@ public class Frame extends JFrame {
         setSize(new Dimension(600, 600));
         setMinimumSize(new Dimension(600, 600));
 
-        anzeigetafel = new Anzeigetafel(this);
-        menuetafel = new Menuetafel(anzeigetafel, this);
+        menuetafel = new Menuetafel(this);
+        anzeigetafel = new Anzeigetafel(this, Menuetafel.getBoard());
 
         GridLayout gridLayout = new GridLayout(1, 2);
         setLayout(gridLayout);
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         add(anzeigetafel);
         add(menuetafel);

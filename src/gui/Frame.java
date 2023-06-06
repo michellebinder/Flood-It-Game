@@ -17,8 +17,8 @@ public class Frame extends JFrame {
         setMinimumSize(new Dimension(600, 600));
 
         menuetafel = new Menuetafel(this);
-        anzeigetafel = new Anzeigetafel(this, Menuetafel.getBoard());
-
+        // anzeigetafel = new Anzeigetafel(this, Menuetafel.getBoard(), menuetafel);
+        anzeigetafel = new Anzeigetafel(this, menuetafel);
         GridLayout gridLayout = new GridLayout(1, 2);
         setLayout(gridLayout);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,4 +28,21 @@ public class Frame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
+    public Menuetafel getMenuetafel() {
+        return menuetafel;
+    }
+
+    public void setMenuetafel(Menuetafel menuetafel) {
+        this.menuetafel = menuetafel;
+    }
+
+    public Anzeigetafel getAnzeigetafel() {
+        return anzeigetafel;
+    }
+
+    public void setAnzeigetafel(Anzeigetafel anzeigetafel) {
+        this.anzeigetafel = anzeigetafel;
+    }
+
 }

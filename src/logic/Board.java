@@ -15,6 +15,8 @@ public class Board {
     public static int cols;
     private Field[][] board;
     Color[] colors = new Color[9];
+
+    // liste die die komponente von einem spieler darstellt
     List<Field> component_player_1;
     List<Field> component_player_2;
 
@@ -32,7 +34,7 @@ public class Board {
         board = new Field[rows][cols];
 
         colors[0] = Color.LIGHT_GRAY;
-        colors[1] = Color.BLACK;
+        colors[1] = Color.GRAY;
         colors[2] = Color.ORANGE;
         colors[3] = Color.BLUE;
         colors[4] = Color.CYAN;

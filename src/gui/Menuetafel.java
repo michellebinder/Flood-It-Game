@@ -18,6 +18,8 @@ public class Menuetafel extends JPanel {
     private JButton bedienungsanleitung_btn;
 
     private JButton start_btn;
+    public static String start_btn_value = "Start";
+    public static boolean drawBoard;
 
     private JButton play_btn;
 
@@ -53,12 +55,7 @@ public class Menuetafel extends JPanel {
     public Menuetafel(Frame f) {
 
         setBackground(Color.lightGray);
-
         setLayout(new GridLayout(17, 1));
-
-        anzeigetafel = new Anzeigetafel(f, board);
-
-        board = new Board(selected_num_of_rows, selected_num_of_cols);
 
         bedienungsanleitung_btn = new JButton("Bedienungsanleitung");
         start_btn = new JButton("Start");
@@ -117,13 +114,20 @@ public class Menuetafel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 // If the Start button is clicked, change its text to "Stop"
                 if (start_btn.getText().equals("Start")) {
-
+                    board = new Board(selected_num_of_rows, selected_num_of_cols);
+                    f.getAnzeigetafel().setBoard(board);
+                    // f.getAnzeigetafel().setDrawBoard(true);
+                    Anzeigetafel.drawBoard = true;
+                    f.getAnzeigetafel().repaint();
                     start_btn.setText("Stop");
+                    start_btn_value = "Stop";
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
-                    // anzeigetafel.setDrawBoard(false);
-                    anzeigetafel.repaint();
+                    // f.getAnzeigetafel().setDrawBoard(false);
+                    Anzeigetafel.drawBoard = false;
+                    start_btn_value = "Start";
+                    f.getAnzeigetafel().repaint();
                 }
             }
         });
@@ -279,15 +283,22 @@ public class Menuetafel extends JPanel {
     }
 
     private void resizeComponents(Frame f) {
-        int width = (int) (f.getWidth() * 0.3);
-        int height = f.getHeight();
-        setPreferredSize(new Dimension(width, height));
+        setPreferredSize(new Dimension((int) (f.getWidth() * 0.3), f.getHeight()));
         revalidate();
         repaint();
 
-        anzeigetafel.setPreferredSize(new Dimension((int) (f.getWidth() * 0.7), f.getHeight()));
-        anzeigetafel.revalidate();
-        anzeigetafel.repaint();
+        // anzeigetafel.setPreferredSize(new Dimension((int) (f.getWidth() * 0.7),
+        // f.getHeight()));
+        // anzeigetafel.revalidate();
+        // anzeigetafel.repaint();
+    }
+
+    public static boolean isDrawBoard() {
+        return drawBoard;
+    }
+
+    public static void setDrawBoard(boolean drawBoard) {
+        Menuetafel.drawBoard = drawBoard;
     }
 
 }

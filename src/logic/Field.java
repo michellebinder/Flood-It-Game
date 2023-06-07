@@ -1,7 +1,5 @@
 package logic;
 
-import java.awt.Color;
-
 /*
  * Siehe Hinweise zu Umgang mit dem Repository auf Aufgabenblatt.  
  */
@@ -11,6 +9,8 @@ public class Field {
 	private int color;
 	private int row;
 	private int col;
+	private int x_coordinate;
+	private int y_coordinate;
 
 	public Field(int row, int col, int color) {
 		this.row = row;
@@ -44,6 +44,22 @@ public class Field {
 
 	public void setCol(int col) {
 		this.col = col;
+	}
+
+	public int getX_coordinate() {
+		return x_coordinate;
+	}
+
+	public void setX_coordinate(int x_coordinate) {
+		this.x_coordinate = x_coordinate;
+	}
+
+	public int getY_coordinate() {
+		return y_coordinate;
+	}
+
+	public void setY_coordinate(int y_coordinate) {
+		this.y_coordinate = y_coordinate;
 	}
 
 }

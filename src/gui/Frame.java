@@ -12,12 +12,12 @@ public class Frame extends JFrame {
     private Anzeigetafel anzeigetafel;
 
     public Frame() {
+
         // Set the size and minimum size of the JFrame
         setSize(new Dimension(600, 600));
         setMinimumSize(new Dimension(600, 600));
 
         menuetafel = new Menuetafel(this);
-        // anzeigetafel = new Anzeigetafel(this, Menuetafel.getBoard(), menuetafel);
         anzeigetafel = new Anzeigetafel(this, menuetafel);
         GridLayout gridLayout = new GridLayout(1, 2);
         setLayout(gridLayout);
@@ -28,6 +28,8 @@ public class Frame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
+    // Getter & Setter
 
     public Menuetafel getMenuetafel() {
         return menuetafel;

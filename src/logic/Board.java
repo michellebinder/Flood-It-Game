@@ -6,22 +6,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import gui.Menuetafel;
-import testing.Testing;
 
 public class Board {
 
     private int rows;
     private int cols;
+
     private Field[][] board;
+
     Color[] colors = new Color[9];
     List<Color> selectedColors;
     private int selected_num_of_colors;
 
     // liste die die komponente von einem spieler darstellt
-    List<Field> component_player_1;
-    List<Field> component_player_2;
+    private List<Field> component_player_1;
+    private List<Field> component_player_2;
 
     // stores the colors of each player
     public Color[] colors_of_player_1;
@@ -35,6 +35,7 @@ public class Board {
     private boolean has_valid_starting_fields = false;
 
     public Board(int rows, int cols) {
+
         this.rows = rows;
         this.cols = cols;
 
@@ -187,6 +188,8 @@ public class Board {
         return neighbors;
     }
 
+    // Getter & Setter
+
     public Field getField(int row, int col) {
         return board[row][col];
     }
@@ -228,17 +231,28 @@ public class Board {
         return colors[colorIndex];
     }
 
-    public boolean isStartklar() {
-        Testing testing = new Testing(board);
-        return testing.isStartklar();
-    }
-
     public List<Color> getSelectedColors() {
         return selectedColors;
     }
 
     public void setSelectedColors(List<Color> selectedColors) {
         this.selectedColors = selectedColors;
+    }
+
+    public List<Field> getComponent_player_1() {
+        return component_player_1;
+    }
+
+    public void setComponent_player_1(List<Field> component_player_1) {
+        this.component_player_1 = component_player_1;
+    }
+
+    public List<Field> getComponent_player_2() {
+        return component_player_2;
+    }
+
+    public void setComponent_player_2(List<Field> component_player_2) {
+        this.component_player_2 = component_player_2;
     }
 
 }

@@ -1,25 +1,31 @@
 package gui;
 
 import java.awt.*;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
 import logic.Board;
 
-public class Menuetafel extends JPanel {
+public class Menuetafel extends JPanel implements KeyListener {
 
     public static Board board;
     private JButton bedienungsanleitung_btn;
 
     private JButton start_btn;
     public static String start_btn_value = "Start";
+    private boolean start_btn_is_clicked;
 
     private JButton play_btn;
+    private boolean play_btn_is_clicked;
+    private int farbe_fuer_naechsten_zug;
 
     private JLabel starting_player_lbl;
     private JComboBox<String> starting_player_dropdown;
@@ -55,6 +61,10 @@ public class Menuetafel extends JPanel {
         setBackground(Color.lightGray);
         setLayout(new GridLayout(17, 1));
 
+        setFocusable(true);
+        requestFocusInWindow();
+        addKeyListener(this);
+
         bedienungsanleitung_btn = new JButton("Bedienungsanleitung");
         start_btn = new JButton("Start");
         play_btn = new JButton("Play");
@@ -79,10 +89,18 @@ public class Menuetafel extends JPanel {
         pc_strategy_dropdown = new JComboBox<>(new String[] { "Strategie 01", "Strategie 02", "Strategie 03" });
         pc_strategy_dropdown.setSelectedItem("Strategie 01");
 
-        // TODO: tatsächliche component size einfügen
-        component_size_s1 = new JLabel("Größe der Komponente von S1: ");
-        // TODO: tatsächliche component size einfügen
-        component_size_s2 = new JLabel("Größe der Komponente von S2: ");
+        // TODO: wie kann man den fehler beheben?
+        // component_size_s1 = new JLabel(
+        // "Größe der Komponente von S1: "
+        // + f.getAnzeigetafel().getBoard().getComponent_player_1().size());
+        // component_size_s2 = new JLabel(
+        // "Größe der Komponente von S2: "
+        // + f.getAnzeigetafel().getBoard().getComponent_player_1().size());
+
+        component_size_s1 = new JLabel(
+                "Größe der Komponente von S1: ");
+        component_size_s2 = new JLabel(
+                "Größe der Komponente von S2: ");
 
         timer_lbl = new JLabel("Gespielte Zeit");
         time_lbl = new JLabel("00:00:00"); // Initialer Text der Timer-Anzeige
@@ -114,19 +132,21 @@ public class Menuetafel extends JPanel {
                 if (start_btn.getText().equals("Start")) {
                     board = new Board(selected_num_of_rows, selected_num_of_cols);
                     f.getAnzeigetafel().setBoard(board);
-                    // f.getAnzeigetafel().setDrawBoard(true);
-                    Anzeigetafel.drawBoard = true;
+                    f.getAnzeigetafel().setStart_btn_is_clicked(true);
+                    start_btn_is_clicked = true;
                     f.getAnzeigetafel().repaint();
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
-                    // f.getAnzeigetafel().setDrawBoard(false);
-                    Anzeigetafel.drawBoard = false;
+                    f.getAnzeigetafel().setStart_btn_is_clicked(false);
+                    start_btn_is_clicked = false;
                     start_btn_value = "Start";
                     f.getAnzeigetafel().repaint();
                 }
+                setFocusable(true);
+                requestFocusInWindow();
             }
         });
 
@@ -134,14 +154,21 @@ public class Menuetafel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (play_btn.getText().equals("Play")) {
+                    f.getAnzeigetafel().setPlay_btn_is_clicked(true);
+                    play_btn_is_clicked = true;
                     play_btn.setText("Pause");
+                    farbe_fuer_naechsten_zug = f.getAnzeigetafel().getFarbe_fuer_naechsten_zug();
                     disable_buttons();
                     startTimer();
                 } else {
                     play_btn.setText("Play");
+                    f.getAnzeigetafel().setPlay_btn_is_clicked(false);
+                    play_btn_is_clicked = false;
                     enable_buttons();
                     pauseTimer();
                 }
+                setFocusable(true);
+                requestFocusInWindow();
             }
         });
 
@@ -289,6 +316,37 @@ public class Menuetafel extends JPanel {
         // f.getHeight()));
         // anzeigetafel.revalidate();
         // anzeigetafel.repaint();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    // // diese nummern werden returned, wenn man auf die zahlen tasten klickt
+    // // 48 -- 0
+    // // 49 -- 1
+    // // 50 -- 2
+    // // 51 -- 3
+    // // 52 -- 4
+    // // 53 -- 5
+    // // 54 -- 6
+    // // 55 -- 7
+    // // 56 -- 8
+    // // 57 -- 9
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyChar() - '0'; // Konvertierung von char zu int
+        if (key >= 1 && key <= 9) {
+            List<Color> selectedColors = board.getSelectedColors();
+            if (key <= selectedColors.size()) {
+                farbe_fuer_naechsten_zug = key - 1;
+                System.out.println("Die ausgewählte Farbe ist: " + farbe_fuer_naechsten_zug);
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
     }
 
 }

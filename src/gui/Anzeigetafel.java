@@ -3,8 +3,6 @@ package gui;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -26,7 +24,6 @@ public class Anzeigetafel extends JPanel implements MouseListener {
         setBackground(Color.white);
         setFocusable(true);
         requestFocusInWindow();
-        // addKeyListener(this);
         addMouseListener(this);
 
     }
@@ -69,7 +66,7 @@ public class Anzeigetafel extends JPanel implements MouseListener {
                 int offsetX;
                 int offsetY;
 
-                // Bestimmen der aktuellen Zeile basierend auf der Position des Elements
+                // aktuelle zeile herausfinden
                 if (i < colorsInTopRow) {
                     currentRow = 0; // Element befindet sich in der oberen Zeile
                     offsetX = i;
@@ -78,10 +75,10 @@ public class Anzeigetafel extends JPanel implements MouseListener {
                     offsetX = i - colorsInTopRow;
                 }
 
-                // Berechnen der vertikalen Verschiebung basierend auf der aktuellen Zeile
+                // berechne vertikale Verschiebung basierend auf der aktuellen Zeile
                 offsetY = currentRow * (legend_field_size + 20); // 20 Pixel Abstand zwischen den Zeilen
 
-                // Zeichnen des Legenden-Elements
+                // zeichnen des Legenden-Elements
                 drawLegendElement(g, selectedColor, legendX + offsetX * (legend_field_size + 5), legendY + offsetY,
                         legend_field_size);
             }
@@ -122,7 +119,7 @@ public class Anzeigetafel extends JPanel implements MouseListener {
         int textWidth = fm.stringWidth("1");
         int textHeight = fm.getHeight();
         int textX = x + (size - textWidth) / 2;
-        int textY = y + size + textHeight; // Anpassung der y-Koordinate für die Positionierung unter der Farbe
+        int textY = y + size + textHeight; 
         g.drawString(Integer.toString(board.getSelectedColors().indexOf(color) + 1), textX, textY);
     }
 
@@ -189,8 +186,8 @@ public class Anzeigetafel extends JPanel implements MouseListener {
 
         for (int i = 0; i < selectedColors.size(); i++) {
             Color selectedColor = selectedColors.get(i);
-            int offsetX = i % 5; // Horizontaler Offset: Rest der Division durch 5
-            int offsetY = i / 5; // Vertikaler Offset: Ganzzahlige Division durch 5
+            int offsetX = i % 5;
+            int offsetY = i / 5;
 
             // Überprüfen, ob der Klick innerhalb des aktuellen Legenden-Elements liegt
             if (mouseX >= legendX + offsetX * (legend_field_size + 5)

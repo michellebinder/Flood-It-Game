@@ -4,8 +4,6 @@ import java.awt.*;
 
 import javax.swing.JFrame;
 
-import logic.Board;
-
 public class Frame extends JFrame {
 
     private Menuetafel menuetafel;

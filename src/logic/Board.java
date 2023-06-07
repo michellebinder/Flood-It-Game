@@ -30,6 +30,10 @@ public class Board {
     public int starting_color_of_player_1;
     public int starting_color_of_player_2;
 
+    private boolean has_valid_num_of_unique_colors = false;
+    private boolean has_valid_neighbours = false;
+    private boolean has_valid_starting_fields = false;
+
     public Board(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
@@ -47,7 +51,9 @@ public class Board {
         colors[8] = Color.YELLOW;
 
         selected_num_of_colors = Menuetafel.selected_num_of_colors;
-        createBoard();
+        while (!has_valid_num_of_unique_colors) {
+            createBoard();
+        }
 
         // stores the number of the players starting colors
         starting_color_of_player_1 = board[rows - 1][0].getColor();
@@ -63,12 +69,7 @@ public class Board {
 
         int num_of_unique_colors = 0;
         selectedColors = new ArrayList<>();
-        Field currentField;
         Set<Integer> uniqueColors = new HashSet<>();
-
-        boolean has_valid_neighbours = false;
-        boolean has_valid_starting_fields = false;
-        boolean has_valid_num_of_unique_colors = false;
 
         // befülle die liste selectedColors mit so vielen farben, wie der user
         // ausgewählt hat
@@ -83,61 +84,59 @@ public class Board {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
 
-                do {
-                    // entscheide dich random für eine farbe
-                    random_color_index = random.nextInt(selectedColors.size());
+                // entscheide dich random für eine farbe
+                random_color_index = random.nextInt(selectedColors.size());
 
-                    // erste feld
-                    if (i == 0 && j == 0) {
+                // erste feld
+                if (i == 0 && j == 0) {
 
-                        board[i][j] = new Field(i, j, random_color_index);
+                    board[i][j] = new Field(i, j, random_color_index);
 
+                }
+
+                // erste reihe -> vergleiche mit feld links von dem aktuellen
+                else if (i == 0) {
+
+                    while (board[i][j - 1].getColor() == random_color_index) {
+                        random_color_index = random.nextInt(selectedColors.size());
                     }
 
-                    // erste reihe -> vergleiche mit feld links von dem aktuellen
-                    else if (i == 0) {
+                    board[i][j] = new Field(i, j, random_color_index);
 
-                        while (board[i][j - 1].getColor() == random_color_index) {
-                            random_color_index = random.nextInt(selectedColors.size());
-                        }
-
-                        board[i][j] = new Field(i, j, random_color_index);
-
-                        // spalte ganz links -> vergleiche immer mit dem feld über dir, weil rechts
-                        // davon noch nichts existiert
-                    } else if (j == 0) {
-                        while (board[i - 1][j].getColor() == random_color_index) {
-                            random_color_index = random.nextInt(selectedColors.size());
-                        }
-
-                        board[i][j] = new Field(i, j, random_color_index);
-
+                    // spalte ganz links -> vergleiche immer mit dem feld über dir, weil rechts
+                    // davon noch nichts existiert
+                } else if (j == 0) {
+                    while (board[i - 1][j].getColor() == random_color_index) {
+                        random_color_index = random.nextInt(selectedColors.size());
                     }
 
-                    // alle restlichen felder: vergleiche mit dem feld über dir und mit dem feld
-                    // rechts von dir
-                    else {
-                        // drüber
-                        while (board[i - 1][j].getColor() == random_color_index
-                                // links davon
-                                || board[i][j - 1].getColor() == random_color_index) {
-                            random_color_index = random.nextInt(selectedColors.size());
-                        }
+                    board[i][j] = new Field(i, j, random_color_index);
 
-                        board[i][j] = new Field(i, j, random_color_index);
+                }
 
-                    }
-                    if (!uniqueColors.contains(board[i][j].getColor())) {
-                        uniqueColors.add(board[i][j].getColor());
-                    }
-                    // wenn die tatsächlichen farben auf dem brett der vom nutzer ausgewählten
-                    // anzahl entsprechen
-                    if (uniqueColors.size() == selectedColors.size()) {
-                        has_valid_num_of_unique_colors = true;
-
+                // alle restlichen felder: vergleiche mit dem feld über dir und mit dem feld
+                // rechts von dir
+                else {
+                    // drüber
+                    while (board[i - 1][j].getColor() == random_color_index
+                            // links davon
+                            || board[i][j - 1].getColor() == random_color_index) {
+                        random_color_index = random.nextInt(selectedColors.size());
                     }
 
-                } while (!has_valid_num_of_unique_colors);
+                    board[i][j] = new Field(i, j, random_color_index);
+
+                }
+                if (!uniqueColors.contains(board[i][j].getColor())) {
+                    uniqueColors.add(board[i][j].getColor());
+                }
+                // wenn die tatsächlichen farben auf dem brett der vom nutzer ausgewählten
+                // anzahl entsprechen
+                if (uniqueColors.size() == selectedColors.size()) {
+                    has_valid_num_of_unique_colors = true;
+
+                }
+
             }
         }
 

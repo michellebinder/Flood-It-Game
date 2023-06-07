@@ -51,7 +51,7 @@ public class Board {
         colors[8] = Color.YELLOW;
 
         selected_num_of_colors = Menuetafel.selected_num_of_colors;
-        while (!has_valid_num_of_unique_colors) {
+        while (!has_valid_num_of_unique_colors || !has_valid_neighbours) {
             createBoard();
         }
 
@@ -111,11 +111,9 @@ public class Board {
                     }
 
                     board[i][j] = new Field(i, j, random_color_index);
-
                 }
-
                 // alle restlichen felder: vergleiche mit dem feld über dir und mit dem feld
-                // rechts von dir
+                // links von dir
                 else {
                     // drüber
                     while (board[i - 1][j].getColor() == random_color_index
@@ -123,9 +121,7 @@ public class Board {
                             || board[i][j - 1].getColor() == random_color_index) {
                         random_color_index = random.nextInt(selectedColors.size());
                     }
-
                     board[i][j] = new Field(i, j, random_color_index);
-
                 }
                 if (!uniqueColors.contains(board[i][j].getColor())) {
                     uniqueColors.add(board[i][j].getColor());
@@ -136,7 +132,6 @@ public class Board {
                     has_valid_num_of_unique_colors = true;
 
                 }
-
             }
         }
 
@@ -144,13 +139,9 @@ public class Board {
         // wie das Feld in der Ecke rechts oben.
         Field upper_right_field = board[0][board[0].length - 1];
         Field lower_left_field = board[board.length - 1][0];
-        random_color_index = random.nextInt(selectedColors.size());
         // wenn das feld oben rechts und unten links ne andere farbe haben ->
-        if (upper_right_field.getColor() == lower_left_field.getColor()) {
-            while (!checkIfNeighborColorsAreValid(lower_left_field)) {
-                board[board.length - 1][0].setColor(random_color_index);
-            }
-
+        if (upper_right_field.getColor() != lower_left_field.getColor()) {
+            has_valid_neighbours = true;
         }
     }
 

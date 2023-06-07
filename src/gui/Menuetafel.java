@@ -13,13 +13,11 @@ import logic.Board;
 
 public class Menuetafel extends JPanel {
 
-    private Anzeigetafel anzeigetafel;
     public static Board board;
     private JButton bedienungsanleitung_btn;
 
     private JButton start_btn;
     public static String start_btn_value = "Start";
-    public static boolean drawBoard;
 
     private JButton play_btn;
 
@@ -291,14 +289,6 @@ public class Menuetafel extends JPanel {
         // f.getHeight()));
         // anzeigetafel.revalidate();
         // anzeigetafel.repaint();
-    }
-
-    public static boolean isDrawBoard() {
-        return drawBoard;
-    }
-
-    public static void setDrawBoard(boolean drawBoard) {
-        Menuetafel.drawBoard = drawBoard;
     }
 
 }

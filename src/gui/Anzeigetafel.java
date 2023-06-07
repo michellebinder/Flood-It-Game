@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -12,20 +14,8 @@ public class Anzeigetafel extends JPanel {
     public static boolean drawBoard;
 
     public Anzeigetafel(Frame f, Menuetafel m) {
-        // this.board = board;
         Anzeigetafel.drawBoard = false;
         setBackground(Color.white);
-
-        // // legende
-        // int numOfColors = board.getColors().length;
-        // int halfWidth = getWidth() / 2;
-        // for (int i = 0; i <= numOfColors; i++) {
-        // JButton button = new JButton("whatever");
-        // button.setBounds(halfWidth + getWidth() / numOfColors * i, getHeight() - 20,
-        // 20, 20);
-        // this.add(button);
-
-        // }
     }
 
     @Override
@@ -33,13 +23,33 @@ public class Anzeigetafel extends JPanel {
         super.paintComponent(g);
 
         if (drawBoard) {
-
             int originX = 25;
             int originY = 25;
             int width = getWidth() - originX * 2;
             int height = getHeight() - originY * 2;
 
             int fieldSize = Math.min(width / Menuetafel.selected_num_of_cols, height / Menuetafel.selected_num_of_rows);
+
+            int legend_field_size = width / 9;
+
+            int legendOriginX = originX;
+            int legendOriginY = originY + Menuetafel.selected_num_of_rows * fieldSize;
+
+            int legendX = legendOriginX;
+            int legendY = legendOriginY + fieldSize;
+
+            List<Color> selectedColors = board.getSelectedColors();
+
+            for (Color selectedColor : selectedColors) {
+                g.setColor(selectedColor);
+                g.fillRect(legendX, legendY, fieldSize, fieldSize);
+                g.setColor(Color.BLACK);
+                g.drawRect(legendX, legendY, fieldSize, fieldSize);
+                g.setColor(Color.BLACK); // Schriftfarbe auf Schwarz setzen
+                g.drawString(Integer.toString(selectedColors.indexOf(selectedColor) + 1), legendX + fieldSize / 2,
+                        legendY + fieldSize / 2);
+                legendX += fieldSize;
+            }
 
             for (int i = 0; i < Menuetafel.selected_num_of_rows; i++) {
                 for (int j = 0; j < Menuetafel.selected_num_of_cols; j++) {
@@ -52,10 +62,12 @@ public class Anzeigetafel extends JPanel {
                     g.drawRect(x, y, fieldSize, fieldSize);
                 }
             }
+
+            // Wenn drawBoard = false ist (wenn stop geklickt wird), gemaltes Board wieder
+            // entfernen
         } else {
             super.paintComponent(g);
         }
-
     }
 
     public boolean isDrawBoard() {

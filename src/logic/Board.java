@@ -6,40 +6,50 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import gui.Menuetafel;
+
+import gui.Frame;
 
 public class Board {
+
+    private Frame frame;
 
     private int rows;
     private int cols;
 
     private Field[][] board;
 
-    Color[] colors = new Color[9];
-    List<Color> selectedColors;
+    private Color[] colors = new Color[9];
+    private ArrayList<Color> selectedColors;
     private int selected_num_of_colors;
 
     // liste die die komponente von einem spieler darstellt
-    private List<Field> component_player_1;
-    private List<Field> component_player_2;
+    private ArrayList<Field> component_player_1;
+    private ArrayList<Field> component_player_2;
+
+    private boolean p1_ist_dran;
+    private boolean p2_ist_dran;
 
     // stores the colors of each player
-    public Color[] colors_of_player_1;
-    public Color[] colors_of_player_2;
+    private Color[] colors_of_player_1;
+    private Color[] colors_of_player_2;
 
-    public int starting_color_of_player_1;
-    public int starting_color_of_player_2;
+    private int starting_color_of_player_1;
+    private int starting_color_of_player_2;
 
     private boolean has_valid_num_of_unique_colors = false;
     private boolean has_valid_neighbours = false;
     private boolean has_valid_starting_fields = false;
 
-    public Board(int rows, int cols) {
+    public Board(int rows, int cols, Frame frame) {
 
         this.rows = rows;
         this.cols = cols;
+        this.frame = frame;
 
         board = new Field[rows][cols];
+
+        component_player_1 = new ArrayList<Field>();
+        component_player_2 = new ArrayList<Field>();
 
         colors[0] = Color.LIGHT_GRAY;
         colors[1] = Color.GRAY;
@@ -51,8 +61,8 @@ public class Board {
         colors[7] = Color.PINK;
         colors[8] = Color.YELLOW;
 
-        selected_num_of_colors = Menuetafel.selected_num_of_colors;
-        while (!has_valid_num_of_unique_colors || !has_valid_neighbours) {
+        selected_num_of_colors = frame.getMenuetafel().getSelected_num_of_colors();
+        while (!has_valid_num_of_unique_colors || !has_valid_starting_fields) {
             createBoard();
         }
 
@@ -64,7 +74,7 @@ public class Board {
         // System.out.println("color index s2: " + starting_color_of_player_2);
     }
 
-    public void createBoard() {
+    private void createBoard() {
 
         Random random = new Random();
 
@@ -140,9 +150,42 @@ public class Board {
         // wie das Feld in der Ecke rechts oben.
         Field upper_right_field = board[0][board[0].length - 1];
         Field lower_left_field = board[board.length - 1][0];
-        // wenn das feld oben rechts und unten links ne andere farbe haben ->
+        // wenn das feld oben rechts und unten links ne andere farbe haben
         if (upper_right_field.getColor() != lower_left_field.getColor()) {
-            has_valid_neighbours = true;
+            has_valid_starting_fields = true;
+            addFieldToComponentOfPlayer1(lower_left_field);
+            addFieldToComponentOfPlayer2(upper_right_field);
+        }
+
+        printComponent1();
+        printComponent2();
+    }
+
+    private void addFieldToComponentOfPlayer1(Field field) {
+        component_player_1.add(field);
+    }
+
+    private void addFieldToComponentOfPlayer2(Field field) {
+        component_player_2.add(field);
+    }
+
+    private void printComponent1() {
+        for (Field f : component_player_1) {
+            int row = f.getRow();
+            int col = f.getCol();
+            int color = f.getColor();
+            System.out.println("comp p1: (" + row + "," + col + "), color: " + color);
+            System.out.println();
+        }
+    }
+
+    private void printComponent2() {
+        for (Field f : component_player_2) {
+            int row = f.getRow();
+            int col = f.getCol();
+            int color = f.getColor();
+            System.out.println("comp p2: (" + row + "," + col + "), color: " + color);
+            System.out.println("end");
         }
     }
 
@@ -231,28 +274,116 @@ public class Board {
         return colors[colorIndex];
     }
 
-    public List<Color> getSelectedColors() {
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public void setFrame(Frame frame) {
+        this.frame = frame;
+    }
+
+    public ArrayList<Color> getSelectedColors() {
         return selectedColors;
     }
 
-    public void setSelectedColors(List<Color> selectedColors) {
+    public void setSelectedColors(ArrayList<Color> selectedColors) {
         this.selectedColors = selectedColors;
     }
 
-    public List<Field> getComponent_player_1() {
+    public int getSelected_num_of_colors() {
+        return selected_num_of_colors;
+    }
+
+    public void setSelected_num_of_colors(int selected_num_of_colors) {
+        this.selected_num_of_colors = selected_num_of_colors;
+    }
+
+    public ArrayList<Field> getComponent_player_1() {
         return component_player_1;
     }
 
-    public void setComponent_player_1(List<Field> component_player_1) {
+    public void setComponent_player_1(ArrayList<Field> component_player_1) {
         this.component_player_1 = component_player_1;
     }
 
-    public List<Field> getComponent_player_2() {
+    public ArrayList<Field> getComponent_player_2() {
         return component_player_2;
     }
 
-    public void setComponent_player_2(List<Field> component_player_2) {
+    public void setComponent_player_2(ArrayList<Field> component_player_2) {
         this.component_player_2 = component_player_2;
+    }
+
+    public Color[] getColors_of_player_1() {
+        return colors_of_player_1;
+    }
+
+    public void setColors_of_player_1(Color[] colors_of_player_1) {
+        this.colors_of_player_1 = colors_of_player_1;
+    }
+
+    public Color[] getColors_of_player_2() {
+        return colors_of_player_2;
+    }
+
+    public void setColors_of_player_2(Color[] colors_of_player_2) {
+        this.colors_of_player_2 = colors_of_player_2;
+    }
+
+    public int getStarting_color_of_player_1() {
+        return starting_color_of_player_1;
+    }
+
+    public void setStarting_color_of_player_1(int starting_color_of_player_1) {
+        this.starting_color_of_player_1 = starting_color_of_player_1;
+    }
+
+    public int getStarting_color_of_player_2() {
+        return starting_color_of_player_2;
+    }
+
+    public void setStarting_color_of_player_2(int starting_color_of_player_2) {
+        this.starting_color_of_player_2 = starting_color_of_player_2;
+    }
+
+    public boolean isHas_valid_num_of_unique_colors() {
+        return has_valid_num_of_unique_colors;
+    }
+
+    public void setHas_valid_num_of_unique_colors(boolean has_valid_num_of_unique_colors) {
+        this.has_valid_num_of_unique_colors = has_valid_num_of_unique_colors;
+    }
+
+    public boolean isHas_valid_neighbours() {
+        return has_valid_neighbours;
+    }
+
+    public void setHas_valid_neighbours(boolean has_valid_neighbours) {
+        this.has_valid_neighbours = has_valid_neighbours;
+    }
+
+    public boolean isHas_valid_starting_fields() {
+        return has_valid_starting_fields;
+    }
+
+    public void setHas_valid_starting_fields(boolean has_valid_starting_fields) {
+        this.has_valid_starting_fields = has_valid_starting_fields;
+    }
+
+    public boolean isP1_ist_dran() {
+        return p1_ist_dran;
+    }
+
+    public void setP1_ist_dran(boolean p1_ist_dran) {
+        this.p1_ist_dran = p1_ist_dran;
+    }
+
+    public boolean isP2_ist_dran() {
+        return p2_ist_dran;
+    }
+
+    public void setP2_ist_dran(boolean p2_ist_dran) {
+        this.p2_ist_dran = p2_ist_dran;
     }
 
 }

@@ -16,7 +16,7 @@ public class Frame extends JFrame {
         setMinimumSize(new Dimension(600, 600));
 
         menuetafel = new Menuetafel(this);
-        anzeigetafel = new Anzeigetafel(this, menuetafel);
+        anzeigetafel = new Anzeigetafel(this);
         GridLayout gridLayout = new GridLayout(1, 2);
         setLayout(gridLayout);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

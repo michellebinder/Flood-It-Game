@@ -1,18 +1,15 @@
 package gui;
 
 import java.awt.*;
-import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import logic.Board;
 
-public class Menuetafel extends JPanel implements KeyListener {
+public class Menuetafel extends JPanel {
 
     private Frame frame;
     private Board board;
@@ -59,10 +56,6 @@ public class Menuetafel extends JPanel implements KeyListener {
 
         setBackground(Color.lightGray);
         setLayout(new GridLayout(17, 1));
-
-        setFocusable(true);
-        requestFocusInWindow();
-        addKeyListener(this);
 
         this.frame = frame;
 
@@ -125,7 +118,6 @@ public class Menuetafel extends JPanel implements KeyListener {
                 if (start_btn.getText().equals("Start")) {
                     board = new Board(selected_num_of_rows, selected_num_of_cols, frame);
                     frame.getAnzeigetafel().setBoard(board);
-                    frame.getAnzeigetafel().setStart_btn_is_clicked(true);
                     start_btn_is_clicked = true;
                     frame.getAnzeigetafel().repaint();
                     start_btn.setText("Stop");
@@ -133,7 +125,6 @@ public class Menuetafel extends JPanel implements KeyListener {
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
-                    frame.getAnzeigetafel().setStart_btn_is_clicked(false);
                     start_btn_is_clicked = false;
                     frame.getAnzeigetafel().getBoard().setComponent_player_1(null);
                     frame.getAnzeigetafel().getBoard().setComponent_player_2(null);
@@ -149,7 +140,6 @@ public class Menuetafel extends JPanel implements KeyListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (play_btn.getText().equals("Play") && isStart_btn_is_clicked()) {
-                    frame.getAnzeigetafel().setPlay_btn_is_clicked(true);
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
                     farbe_fuer_naechsten_zug = frame.getAnzeigetafel().getFarbe_fuer_naechsten_zug();
@@ -159,9 +149,10 @@ public class Menuetafel extends JPanel implements KeyListener {
                             + frame.getAnzeigetafel().getBoard().getComponent_player_2().size());
                     disable_buttons();
                     startTimer();
+                    frame.getAnzeigetafel().requestFocusInWindow();
+                    frame.getAnzeigetafel().requestFocus();
                 } else {
                     play_btn.setText("Play");
-                    frame.getAnzeigetafel().setPlay_btn_is_clicked(false);
                     play_btn_is_clicked = false;
                     enable_buttons();
                     pauseTimer();
@@ -315,41 +306,6 @@ public class Menuetafel extends JPanel implements KeyListener {
         // f.getHeight()));
         // anzeigetafel.revalidate();
         // anzeigetafel.repaint();
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    // // diese nummern werden returned, wenn man auf die zahlen tasten klickt
-    // // 48 -- 0
-    // // 49 -- 1
-    // // 50 -- 2
-    // // 51 -- 3
-    // // 52 -- 4
-    // // 53 -- 5
-    // // 54 -- 6
-    // // 55 -- 7
-    // // 56 -- 8
-    // // 57 -- 9
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // erfasse die key events nur dann, wenn das spiel gestartet und play gedrückt
-        // wurde
-        if (start_btn_is_clicked && play_btn_is_clicked) {
-            int key = e.getKeyChar() - '0'; // Konvertierung von char zu int
-            if (key >= 1 && key <= 9) {
-                List<Color> selectedColors = board.getSelectedColors();
-                if (key <= selectedColors.size()) {
-                    farbe_fuer_naechsten_zug = key - 1;
-                    System.out.println("Die ausgewählte Farbe ist: " + farbe_fuer_naechsten_zug);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
     }
 
     // Getter & Setter

@@ -4,6 +4,7 @@ package testing;
  */
 
 import logic.Field;
+import logic.Board;
 
 public class Testing {
 
@@ -15,9 +16,13 @@ public class Testing {
 
 	}
 
+	// TODO: fragen ob das so richtig ist
 	public boolean isStartklar() {
-
-		return true;
+		if (Board.isIs_start_klar()) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean isEndConfig() {
@@ -25,16 +30,22 @@ public class Testing {
 		return false;
 	}
 
+	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
+	// nächstes wählt
 	public int testStrategy01() {
 
 		return 0;
 	}
 
+	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
+	// nächstes wählt
 	public int testStrategy02() {
 
 		return 0;
 	}
 
+	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
+	// nächstes wählt
 	public int testStrategy03() {
 
 		return 0;

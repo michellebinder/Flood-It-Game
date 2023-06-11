@@ -2,43 +2,49 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import logic.Board;
 import logic.Field;
 
-public class Anzeigetafel extends JPanel implements MouseListener {
+public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
     private Board board;
-    private boolean start_btn_is_clicked;
-    private boolean play_btn_is_clicked;
     private int fieldSize;
     private int farbe_fuer_naechsten_zug;
     private Frame frame;
     private boolean farbe_wurde_ausgewaehlt;
     private ArrayList<Field> legende;
     private boolean is_color_change_enabled = true;
+    private JLabel current_player_anzeige_lbl;
 
     public Anzeigetafel(Frame frame) {
 
         this.frame = frame;
-        start_btn_is_clicked = frame.getMenuetafel().isPlay_btn_is_clicked();
-        play_btn_is_clicked = frame.getMenuetafel().isPlay_btn_is_clicked();
         setBackground(Color.white);
+
         setFocusable(true);
         requestFocusInWindow();
-        addMouseListener(this);
 
+        addMouseListener(this);
+        addKeyListener(this);
+        current_player_anzeige_lbl = new JLabel();
+        add(current_player_anzeige_lbl);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Board erst zeichnen, wenn auf Start-Button geklickt wurde
-        if (start_btn_is_clicked) {
+        // Board und legende erst zeichnen, wenn auf Start-Button geklickt wurde
+        if (frame.getMenuetafel().isStart_btn_is_clicked()) {
 
             setFocusable(true);
             requestFocusInWindow();
@@ -71,6 +77,14 @@ public class Anzeigetafel extends JPanel implements MouseListener {
                     // board.getBoard()[i][j].getX_coordinate()
                     // + " y-Wert: " + board.getBoard()[i][j].getY_coordinate());
                 }
+            }
+
+            // TODO: nachfragen, wieso das sich nicht richtig ändert mit repaint
+            // immer sobald sich ändert wer dran ist anpassen
+            if (frame.getMenuetafel().getSelected_starting_player().equals("S1 beginnt")) {
+                current_player_anzeige_lbl.setText("Du bist dran");
+            } else if (frame.getMenuetafel().getSelected_starting_player().equals("S2 beginnt")) {
+                current_player_anzeige_lbl.setText("Der Computer ist dran");
             }
 
             /******** LEGENDE *********/
@@ -109,10 +123,13 @@ public class Anzeigetafel extends JPanel implements MouseListener {
                         legendElementY + legend_field_size + 15);
             }
 
-        } else {
+        } else
+
+        {
             // Wenn auf Stop geklickt wird, soll das Board wieder verschwinden
             super.paintComponent(g);
         }
+
     }
 
     public void drawLegendElement(Graphics g, Color color, int x, int y, int size) {
@@ -122,13 +139,13 @@ public class Anzeigetafel extends JPanel implements MouseListener {
         g.drawRect(x, y, size, size);
     }
 
-    // Mouse Behaviour
-
+    /******** MOUSE BEHAVIOUR *********/
     @Override
     public void mouseClicked(MouseEvent e) {
 
         // erst auf maus klicks auf dem board reagieren wenn auf play gedrückt wurde
-        if (play_btn_is_clicked && is_color_change_enabled) {
+        if (frame.getMenuetafel().isPlay_btn_is_clicked() && is_color_change_enabled) {
+            requestFocusInWindow();
             int mouseX = e.getX(); // X-Koordinate des Klicks
             int mouseY = e.getY(); // Y-Koordinate des Klicks
 
@@ -139,34 +156,11 @@ public class Anzeigetafel extends JPanel implements MouseListener {
                     if (mouseX >= field.getX_coordinate() && mouseX < field.getX_coordinate() + fieldSize &&
                             mouseY >= field.getY_coordinate() && mouseY < field.getY_coordinate() + fieldSize) {
 
-                        if (!farbe_wurde_ausgewaehlt) {
-                            farbe_fuer_naechsten_zug = field.getColor();
-                            System.out.println("Die ausgewählte Farbe ist " + field.getColor());
-                            farbe_wurde_ausgewaehlt = true;
-                        } else {
-                            field.setColor(farbe_fuer_naechsten_zug);
-                            repaint();
-                            System.out.println("Feldfarbe geändert: " + field.getColor());
-                            is_color_change_enabled = false;
-                        }
-                    }
-                }
-            }
-
-            is_color_change_enabled = true;
-            for (Field field : legende) {
-                if (mouseX >= field.getX_coordinate() && mouseX < field.getX_coordinate() + fieldSize &&
-                        mouseY >= field.getY_coordinate() && mouseY < field.getY_coordinate() + fieldSize) {
-
-                    if (!farbe_wurde_ausgewaehlt) {
                         farbe_fuer_naechsten_zug = field.getColor();
-                        System.out.println("Die ausgewählte Farbe ist " + field.getColor());
-                        farbe_wurde_ausgewaehlt = true;
-                    } else {
-                        field.setColor(farbe_fuer_naechsten_zug);
-                        repaint();
-                        System.out.println("Feldfarbe geändert: " + field.getColor());
-                        is_color_change_enabled = false;
+                        System.out.println("Die ausgewählte Farbe ist " + farbe_fuer_naechsten_zug);
+                        // jetzt soll die komponente evtl erweitert werden
+                        board.extendComponent(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
+
                     }
                 }
             }
@@ -193,6 +187,45 @@ public class Anzeigetafel extends JPanel implements MouseListener {
 
     }
 
+    /******** KEY BEHAVIOUR *********/
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    // // diese nummern werden returned, wenn man auf die zahlen tasten klickt
+    // // 48 -- 0
+    // // 49 -- 1
+    // // 50 -- 2
+    // // 51 -- 3
+    // // 52 -- 4
+    // // 53 -- 5
+    // // 54 -- 6
+    // // 55 -- 7
+    // // 56 -- 8
+    // // 57 -- 9
+    @Override
+    public void keyPressed(KeyEvent e) {
+        // erfasse die key events nur dann, wenn das spiel gestartet und play gedrückt
+        // wurde
+        requestFocusInWindow();
+        if (frame.getMenuetafel().isStart_btn_is_clicked() &&
+                frame.getMenuetafel().isPlay_btn_is_clicked()) {
+            int key = e.getKeyChar() - '0'; // Konvertierung von char zu int
+            if (key >= 1 && key <= 9) {
+                List<Color> selectedColors = board.getSelectedColors();
+                if (key <= selectedColors.size()) {
+                    farbe_fuer_naechsten_zug = key - 1;
+                    System.out.println("Die ausgewählte Farbe über tastatur ist: " + farbe_fuer_naechsten_zug);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
     // Getter & Setter
 
     public void setBoard(Board board) {
@@ -204,22 +237,6 @@ public class Anzeigetafel extends JPanel implements MouseListener {
         return board;
     }
 
-    public boolean isStart_btn_is_clicked() {
-        return start_btn_is_clicked;
-    }
-
-    public void setStart_btn_is_clicked(boolean start_btn_is_clicked) {
-        this.start_btn_is_clicked = start_btn_is_clicked;
-    }
-
-    public boolean isPlay_btn_is_clicked() {
-        return play_btn_is_clicked;
-    }
-
-    public void setPlay_btn_is_clicked(boolean play_btn_is_clicked) {
-        this.play_btn_is_clicked = play_btn_is_clicked;
-    }
-
     public int getFarbe_fuer_naechsten_zug() {
         return farbe_fuer_naechsten_zug;
     }
@@ -227,5 +244,4 @@ public class Anzeigetafel extends JPanel implements MouseListener {
     public void setFarbe_fuer_naechsten_zug(int farbe_fuer_naechsten_zug) {
         this.farbe_fuer_naechsten_zug = farbe_fuer_naechsten_zug;
     }
-
 }

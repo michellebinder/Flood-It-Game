@@ -26,19 +26,21 @@ public class Board {
     private ArrayList<Field> component_player_1;
     private ArrayList<Field> component_player_2;
 
-    private boolean p1_ist_dran;
-    private boolean p2_ist_dran;
+    // default: spieler 1 fängt an
+    private boolean p1_ist_dran = true;
+    private boolean p2_ist_dran = false;
 
     // stores the colors of each player
-    private Color[] colors_of_player_1;
-    private Color[] colors_of_player_2;
-
-    private int starting_color_of_player_1;
-    private int starting_color_of_player_2;
+    private int color_of_player_1;
+    private int color_of_player_2;
 
     private boolean has_valid_num_of_unique_colors = false;
     private boolean has_valid_neighbours = false;
     private boolean has_valid_starting_fields = false;
+
+    private static boolean is_start_klar = false;
+
+    private boolean is_first_move;
 
     public Board(int rows, int cols, Frame frame) {
 
@@ -67,11 +69,8 @@ public class Board {
         }
 
         // stores the number of the players starting colors
-        starting_color_of_player_1 = board[rows - 1][0].getColor();
-        starting_color_of_player_2 = board[0][cols - 1].getColor();
-
-        // System.out.println("color index s1: " + starting_color_of_player_1);
-        // System.out.println("color index s2: " + starting_color_of_player_2);
+        color_of_player_1 = board[rows - 1][0].getColor();
+        color_of_player_2 = board[0][cols - 1].getColor();
     }
 
     private void createBoard() {
@@ -144,6 +143,12 @@ public class Board {
 
                 }
             }
+
+            if (has_valid_neighbours && has_valid_num_of_unique_colors && has_valid_starting_fields) {
+                is_start_klar = true;
+            } else {
+                is_start_klar = false;
+            }
         }
 
         // Anforderung 3: Das Feld in der Ecke links unten hat nicht die gleiche Farbe
@@ -158,7 +163,7 @@ public class Board {
         }
 
         printComponent1();
-        printComponent2();
+        // printComponent2();
     }
 
     private void addFieldToComponentOfPlayer1(Field field) {
@@ -169,11 +174,18 @@ public class Board {
         component_player_2.add(field);
     }
 
+    private void setColorOfWholeComponent(ArrayList<Field> component, int new_color) {
+        for (int i = 0; i < component.size(); i++) {
+            component.get(i).setColor(new_color);
+        }
+        frame.getAnzeigetafel().repaint();
+    }
+
     private void printComponent1() {
-        for (Field f : component_player_1) {
-            int row = f.getRow();
-            int col = f.getCol();
-            int color = f.getColor();
+        for (int i = 0; i < component_player_1.size(); i++) {
+            int row = component_player_1.get(i).getRow();
+            int col = component_player_1.get(i).getCol();
+            int color = component_player_1.get(i).getColor();
             System.out.println("comp p1: (" + row + "," + col + "), color: " + color);
             System.out.println();
         }
@@ -203,32 +215,101 @@ public class Board {
     }
 
     private List<Field> getNeighbors(Field field) {
-        List<Field> neighbors = new ArrayList<>();
+        List<Field> neighbours = new ArrayList<>();
         int row = field.getRow();
         int col = field.getCol();
 
         // Überprüfen der Nachbarn oben, unten, links und rechts
         // Überprüfen des oberen Nachbarn
         if (row - 1 >= 0 && row - 1 < board.length && col >= 0 && col < board[row - 1].length) {
-            neighbors.add(board[row - 1][col]);
+            neighbours.add(board[row - 1][col]);
         }
 
         // Überprüfen des unteren Nachbarn
         if (row + 1 >= 0 && row + 1 < board.length && col >= 0 && col < board[row + 1].length) {
-            neighbors.add(board[row + 1][col]);
+            neighbours.add(board[row + 1][col]);
         }
 
         // Überprüfen des linken Nachbarn
         if (row >= 0 && row < board.length && col - 1 >= 0 && col - 1 < board[row].length) {
-            neighbors.add(board[row][col - 1]);
+            neighbours.add(board[row][col - 1]);
         }
 
         // Überprüfen des rechten Nachbarn
         if (row >= 0 && row < board.length && col + 1 >= 0 && col + 1 < board[row].length) {
-            neighbors.add(board[row][col + 1]);
+            neighbours.add(board[row][col + 1]);
         }
 
-        return neighbors;
+        return neighbours;
+    }
+
+    public void extendComponent(ArrayList<Field> component, int selected_color) {
+
+        // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
+        if (checkIfColorSelectionIsValid(selected_color)) {
+
+            // kopie von der komponente, an der die änderungen vorgenommen werden
+            ArrayList<Field> updatedComponent = new ArrayList<>(component);
+
+            // gehe alle felder durch, die in der komponente enthalten sind
+            for (int i = 0; i < updatedComponent.size(); i++) {
+                Field field = updatedComponent.get(i);
+
+                // 1 sekunde puffer bis sich die farbe verändert
+                try {
+                    Thread.sleep(1000);
+                    field.setColor(selected_color);
+                    color_of_player_1 = selected_color;
+                    frame.getAnzeigetafel().repaint();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+
+                // schau dir die nachbarn von dem aktuellen feld an
+                List<Field> neighbours = getNeighbors(field);
+
+                for (Field neighbour : neighbours) {
+                    // füge den nachbarn zur komponente hinzu, falls
+                    // - er nicht schon in der komponente drin ist
+                    // - er die ausgewählte farbe hat
+                    if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
+                        neighbour.setColor(selected_color);
+                        color_of_player_1 = selected_color;
+                        updatedComponent.add(neighbour);
+                        frame.getAnzeigetafel().repaint();
+                    }
+                }
+            }
+            component_player_1 = updatedComponent;
+        } else {
+            System.out.println("Du hast eine ungültige Farbe gewählt.");
+        }
+    }
+
+    // hilfsmethode, die geprüft wird, wenn der spieler einen zug machen will
+    private boolean checkIfColorSelectionIsValid(int selected_color) {
+        // Fall 1: s1 ist dran
+        // s1 darf nicht die eigene farbe nochmal wählen
+        // s1 darf nicht die farbe seines gegners wählen
+        // if (board.isP1_ist_dran()) {
+        if (selected_color != getColor_of_player_1() && selected_color != getColor_of_player_2()) {
+            // color_of_player_1 = selected_color;
+            return true;
+        } else {
+            return false;
+        }
+        // Fall 2: s2 (computer) ist dran
+        // s2 darf nicht die eigene farbe nochmal wählen
+        // s2 darf nicht die farbe seines gegners wählen
+        // } else {
+        // if (selected_color != board.getColor_of_player_2() && selected_color !=
+        // board.getColor_of_player_1()) {
+        // return true;
+        // } else {
+        // return false;
+        // }
+
+        // }
     }
 
     // Getter & Setter
@@ -314,36 +395,20 @@ public class Board {
         this.component_player_2 = component_player_2;
     }
 
-    public Color[] getColors_of_player_1() {
-        return colors_of_player_1;
+    public int getColor_of_player_1() {
+        return color_of_player_1;
     }
 
-    public void setColors_of_player_1(Color[] colors_of_player_1) {
-        this.colors_of_player_1 = colors_of_player_1;
+    public void setColor_of_player_1(int color_of_player_1) {
+        this.color_of_player_1 = color_of_player_1;
     }
 
-    public Color[] getColors_of_player_2() {
-        return colors_of_player_2;
+    public int getColor_of_player_2() {
+        return color_of_player_2;
     }
 
-    public void setColors_of_player_2(Color[] colors_of_player_2) {
-        this.colors_of_player_2 = colors_of_player_2;
-    }
-
-    public int getStarting_color_of_player_1() {
-        return starting_color_of_player_1;
-    }
-
-    public void setStarting_color_of_player_1(int starting_color_of_player_1) {
-        this.starting_color_of_player_1 = starting_color_of_player_1;
-    }
-
-    public int getStarting_color_of_player_2() {
-        return starting_color_of_player_2;
-    }
-
-    public void setStarting_color_of_player_2(int starting_color_of_player_2) {
-        this.starting_color_of_player_2 = starting_color_of_player_2;
+    public void setColor_of_player_2(int color_of_player_2) {
+        this.color_of_player_2 = color_of_player_2;
     }
 
     public boolean isHas_valid_num_of_unique_colors() {
@@ -384,6 +449,22 @@ public class Board {
 
     public void setP2_ist_dran(boolean p2_ist_dran) {
         this.p2_ist_dran = p2_ist_dran;
+    }
+
+    public static boolean isIs_start_klar() {
+        return is_start_klar;
+    }
+
+    public static void setIs_start_klar(boolean is_start_klar) {
+        Board.is_start_klar = is_start_klar;
+    }
+
+    public boolean isIs_first_move() {
+        return is_first_move;
+    }
+
+    public void setIs_first_move(boolean is_first_move) {
+        this.is_first_move = is_first_move;
     }
 
 }

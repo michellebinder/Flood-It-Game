@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
 import gui.Frame;
@@ -214,10 +215,11 @@ public class Board {
                         color_of_player_1 = selected_color;
                         updatedComponent.add(neighbour);
                         frame.getAnzeigetafel().repaint();
-                        p1_ist_dran = false;
-                        p2_ist_dran = true;
+
                     }
                 }
+                p1_ist_dran = false;
+                p2_ist_dran = true;
             }
             // 1 sekunde puffer bis sich die farbe verändert
             // ausserhalb der for-schleife, damit der puffer für die gesamte komponente
@@ -230,8 +232,8 @@ public class Board {
             }
             component_player_1 = updatedComponent;
         } else {
-            // TODO: pop up machen, wenn falsche farbe angeklickt wurde
-            System.out.println("Du hast eine ungültige Farbe gewählt.");
+            // popup fenster wenn eine ungültige farbe gewählt wurde
+            JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
         }
 
         // zug von s2 nach 1 sekunde auslösen
@@ -241,10 +243,10 @@ public class Board {
         });
         timer.setRepeats(false);
         timer.start();
+        frame.getMenuetafel().updateComponentSizeLabels();
     }
 
-    private void makeMoveS2(String selected_pc_strategy) {
-
+    public void makeMoveS2(String selected_pc_strategy) {
         // gewaährleistet das s2 erst einen move macht, wenn s1 einen validen mpve
         // gemacht hat
         if (p2_ist_dran == true) {
@@ -255,8 +257,14 @@ public class Board {
             } else if (selected_pc_strategy.equals("Blocking")) {
                 Blocking();
             }
-            frame.getAnzeigetafel().repaint();
+            try {
+                Thread.sleep(1000);
+                frame.getAnzeigetafel().repaint();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
         }
+        frame.getMenuetafel().updateComponentSizeLabels();
     }
 
     /******** STRATEGIEN VON S2 *********/

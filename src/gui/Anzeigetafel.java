@@ -83,19 +83,13 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 }
             }
 
-            // TODO: nachfragen, wieso das sich nicht richtig ändert mit repaint
-            // immer sobald sich ändert wer dran ist anpassen
-            // if (frame.getMenuetafel().getSelected_starting_player().equals("S1 beginnt"))
-            // {
-            // current_player_anzeige_lbl.setText("Du bist dran");
-            // } else if (frame.getMenuetafel().getSelected_starting_player().equals("S2
-            // beginnt")) {
-            // current_player_anzeige_lbl.setText("Der Computer ist dran");
-            // }
+            // TODO evtl noch play pause button checken?
             if (board.isP1_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
                 current_player_anzeige_lbl.setText("Du bist dran");
-            } else {
+                repaint();
+            } else if (board.isP2_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
                 current_player_anzeige_lbl.setText("Der Computer ist dran");
+                repaint();
             }
 
             /******** LEGENDE *********/
@@ -177,6 +171,11 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                         if (board.isP1_ist_dran()) {
                             board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                         }
+                        // TODO:
+                        if (farbe_fuer_naechsten_zug == board.getColor_of_player_1()
+                                || farbe_fuer_naechsten_zug == board.getColor_of_player_2()) {
+
+                        }
                     }
                 }
             }
@@ -257,7 +256,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                     if (board.isP1_ist_dran()) {
                         board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }
-
                 }
                 // } else if (testchar == 's') {
                 // // board.makeMoveS1Player2(board.getComponent_player_2(),
@@ -289,4 +287,37 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     public void setFarbe_fuer_naechsten_zug(int farbe_fuer_naechsten_zug) {
         this.farbe_fuer_naechsten_zug = farbe_fuer_naechsten_zug;
     }
+
+    public int getFieldSize() {
+        return fieldSize;
+    }
+
+    public void setFieldSize(int fieldSize) {
+        this.fieldSize = fieldSize;
+    }
+
+    public ArrayList<Field> getLegende() {
+        return legende;
+    }
+
+    public void setLegende(ArrayList<Field> legende) {
+        this.legende = legende;
+    }
+
+    public boolean isIs_color_change_enabled() {
+        return is_color_change_enabled;
+    }
+
+    public void setIs_color_change_enabled(boolean is_color_change_enabled) {
+        this.is_color_change_enabled = is_color_change_enabled;
+    }
+
+    public JLabel getCurrent_player_anzeige_lbl() {
+        return current_player_anzeige_lbl;
+    }
+
+    public void setCurrent_player_anzeige_lbl(JLabel current_player_anzeige_lbl) {
+        this.current_player_anzeige_lbl = current_player_anzeige_lbl;
+    }
+
 }

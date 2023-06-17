@@ -123,6 +123,15 @@ public class Menuetafel extends JPanel {
                     frame.getAnzeigetafel().repaint();
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
+
+                    // sobald start geklickt wird, wird dem board übergeben wer anfangen soll
+                    if (selected_starting_player.equals("S2 beginnt")) {
+                        frame.getAnzeigetafel().getBoard().setP2_ist_dran(true);
+                        frame.getAnzeigetafel().getBoard().setP1_ist_dran(false);
+                    } else {
+                        frame.getAnzeigetafel().getBoard().setP1_ist_dran(true);
+                        frame.getAnzeigetafel().getBoard().setP2_ist_dran(false);
+                    }
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
@@ -130,9 +139,11 @@ public class Menuetafel extends JPanel {
                     frame.getAnzeigetafel().getBoard().setComponent_player_1(null);
                     frame.getAnzeigetafel().getBoard().setComponent_player_2(null);
                     start_btn_value = "Start";
-                    frame.getAnzeigetafel().repaint();
                     elapsedTime = 0;
                     updateTimerLabel();
+                    // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
+                    frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+                    frame.getAnzeigetafel().repaint();
                 }
                 setFocusable(true);
                 requestFocusInWindow();
@@ -146,10 +157,11 @@ public class Menuetafel extends JPanel {
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
                     farbe_fuer_naechsten_zug = frame.getAnzeigetafel().getFarbe_fuer_naechsten_zug();
-                    component_size_s1.setText("Größe der Komponente von S1: "
-                            + frame.getAnzeigetafel().getBoard().getComponent_player_1().size());
-                    component_size_s2.setText("Größe der Komponente von S2: "
-                            + frame.getAnzeigetafel().getBoard().getComponent_player_2().size());
+                    // wenn s2 als erster spieler ausgewählt wird dann starte dessen move
+                    if (frame.getAnzeigetafel().getBoard().isP2_ist_dran()) {
+                        frame.getAnzeigetafel().getBoard().makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
+                    }
+                    updateComponentSizeLabels();
                     disable_buttons();
                     startTimer();
                     frame.getAnzeigetafel().requestFocusInWindow();
@@ -170,14 +182,6 @@ public class Menuetafel extends JPanel {
                     String selectedItem = (String) starting_player_dropdown.getSelectedItem();
                     selected_starting_player = selectedItem;
                 }
-                if (selected_starting_player.equals("S2 beginnt")) {
-                    frame.getAnzeigetafel().getBoard().setP2_ist_dran(true);
-                    frame.getAnzeigetafel().getBoard().setP1_ist_dran(false);
-                } else {
-                    frame.getAnzeigetafel().getBoard().setP1_ist_dran(true);
-                    frame.getAnzeigetafel().getBoard().setP2_ist_dran(false);
-                }
-
             }
         });
 
@@ -266,6 +270,13 @@ public class Menuetafel extends JPanel {
         String secondsStr = String.format("%02d", seconds);
 
         time_lbl.setText(hoursStr + ":" + minutesStr + ":" + secondsStr);
+    }
+
+    public void updateComponentSizeLabels() {
+        component_size_s1.setText("Größe der Komponente von S1: "
+                + frame.getAnzeigetafel().getBoard().getComponent_player_1().size());
+        component_size_s2.setText("Größe der Komponente von S2: "
+                + frame.getAnzeigetafel().getBoard().getComponent_player_2().size());
     }
 
     private void disable_buttons() {

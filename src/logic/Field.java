@@ -61,5 +61,4 @@ public class Field {
 	public void setY_coordinate(int y_coordinate) {
 		this.y_coordinate = y_coordinate;
 	}
-
 }

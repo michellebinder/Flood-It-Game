@@ -41,7 +41,7 @@ public class Menuetafel extends JPanel {
 
     private JLabel pc_strategy_lbl;
     private JComboBox<String> pc_strategy_dropdown;
-    private String selected_pc_strategy = "Strategie 01"; // default Strategie 1
+    private String selected_pc_strategy = "Stagnation"; // default Strategie 1
 
     private JLabel component_size_s1;
     private JLabel component_size_s2;
@@ -58,6 +58,7 @@ public class Menuetafel extends JPanel {
         setLayout(new GridLayout(17, 1));
 
         this.frame = frame;
+        setPreferredSize(new Dimension((int) (frame.getWidth() * 0.3), frame.getHeight()));
 
         bedienungsanleitung_btn = new JButton("Bedienungsanleitung");
         start_btn = new JButton("Start");
@@ -80,8 +81,8 @@ public class Menuetafel extends JPanel {
         num_of_cols_dropdown.setSelectedItem(6);
 
         pc_strategy_lbl = new JLabel("Welche Strategie soll der PC spielen?");
-        pc_strategy_dropdown = new JComboBox<>(new String[] { "Strategie 01", "Strategie 02", "Strategie 03" });
-        pc_strategy_dropdown.setSelectedItem("Strategie 01");
+        pc_strategy_dropdown = new JComboBox<>(new String[] { "Stagnation", "Greedy", "Blocking" });
+        pc_strategy_dropdown.setSelectedItem("Stagnation");
 
         component_size_s1 = new JLabel(
                 "Größe der Komponente von S1: 0");
@@ -130,6 +131,8 @@ public class Menuetafel extends JPanel {
                     frame.getAnzeigetafel().getBoard().setComponent_player_2(null);
                     start_btn_value = "Start";
                     frame.getAnzeigetafel().repaint();
+                    elapsedTime = 0;
+                    updateTimerLabel();
                 }
                 setFocusable(true);
                 requestFocusInWindow();
@@ -157,8 +160,6 @@ public class Menuetafel extends JPanel {
                     enable_buttons();
                     pauseTimer();
                 }
-                setFocusable(true);
-                requestFocusInWindow();
             }
         });
 

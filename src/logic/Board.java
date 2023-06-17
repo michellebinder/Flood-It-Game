@@ -1,3 +1,4 @@
+
 package logic;
 
 import java.awt.Color;
@@ -6,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+
+import javax.swing.Timer;
 
 import gui.Frame;
 
@@ -39,8 +42,10 @@ public class Board {
     private boolean has_valid_starting_fields = false;
 
     private static boolean is_start_klar = false;
+    Timer timer;
 
-    private boolean is_first_move;
+    // array to store the num of occurence of each color for strategy
+    private int[] num_of_color_occurence;
 
     public Board(int rows, int cols, Frame frame) {
 
@@ -161,24 +166,6 @@ public class Board {
             addFieldToComponentOfPlayer1(lower_left_field);
             addFieldToComponentOfPlayer2(upper_right_field);
         }
-
-        printComponent1();
-        // printComponent2();
-    }
-
-    private void addFieldToComponentOfPlayer1(Field field) {
-        component_player_1.add(field);
-    }
-
-    private void addFieldToComponentOfPlayer2(Field field) {
-        component_player_2.add(field);
-    }
-
-    private void setColorOfWholeComponent(ArrayList<Field> component, int new_color) {
-        for (int i = 0; i < component.size(); i++) {
-            component.get(i).setColor(new_color);
-        }
-        frame.getAnzeigetafel().repaint();
     }
 
     private void printComponent1() {
@@ -201,21 +188,216 @@ public class Board {
         }
     }
 
-    private boolean checkIfNeighborColorsAreValid(Field field) {
-        List<Field> neighbors = getNeighbors(field);
-        int color = field.getColor();
+    public void makeMoveS1(ArrayList<Field> component, int selected_color) {
 
-        for (Field neighbor : neighbors) {
-            if (neighbor.getColor() == color) {
-                return false;
+        // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
+        if (checkIfColorSelectionIsValid(selected_color)) {
+
+            // kopie von der komponente, an der die änderungen vorgenommen werden
+            ArrayList<Field> updatedComponent = new ArrayList<>(component);
+
+            // gehe alle felder durch, die in der komponente enthalten sind
+            for (int i = 0; i < updatedComponent.size(); i++) {
+                Field field = updatedComponent.get(i);
+                field.setColor(selected_color);
+                color_of_player_1 = selected_color;
+
+                // schau dir die nachbarn von dem aktuellen feld an
+                List<Field> neighbours = getNeighbors(field);
+
+                for (Field neighbour : neighbours) {
+                    // füge den nachbarn zur komponente hinzu, falls
+                    // - er nicht schon in der komponente drin ist
+                    // - er die ausgewählte farbe hat
+                    if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
+                        neighbour.setColor(selected_color);
+                        color_of_player_1 = selected_color;
+                        updatedComponent.add(neighbour);
+                        frame.getAnzeigetafel().repaint();
+                        p1_ist_dran = false;
+                        p2_ist_dran = true;
+                    }
+                }
             }
+            // 1 sekunde puffer bis sich die farbe verändert
+            // ausserhalb der for-schleife, damit der puffer für die gesamte komponente
+            // wirklich nur 1 sek ist, statt 1 sek pro field
+            try {
+                Thread.sleep(1000);
+                frame.getAnzeigetafel().repaint();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            component_player_1 = updatedComponent;
+        } else {
+            // TODO: pop up machen, wenn falsche farbe angeklickt wurde
+            System.out.println("Du hast eine ungültige Farbe gewählt.");
         }
 
-        return true;
+        // zug von s2 nach 1 sekunde auslösen
+        timer = new Timer(1000, e -> {
+            makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
+            timer.stop();
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
-    private List<Field> getNeighbors(Field field) {
-        List<Field> neighbours = new ArrayList<>();
+    private void makeMoveS2(String selected_pc_strategy) {
+
+        // gewaährleistet das s2 erst einen move macht, wenn s1 einen validen mpve
+        // gemacht hat
+        if (p2_ist_dran == true) {
+            if (selected_pc_strategy.equals("Stagnation")) {
+                Stagnation();
+            } else if (selected_pc_strategy.equals("Greedy")) {
+                Greedy();
+            } else if (selected_pc_strategy.equals("Blocking")) {
+                Blocking();
+            }
+            frame.getAnzeigetafel().repaint();
+        }
+    }
+
+    /******** STRATEGIEN VON S2 *********/
+
+    // ziel: komponente soll nicht größer werden
+    // bei mehreren: kleinste farbe wählen
+    private void Stagnation() {
+
+        // finde raus, wie oft jede farbe vorkommt (gespeichert in
+        // num_of_color_occurence array)
+        getNumOfOccurenceOfColors();
+        num_of_color_occurence[color_of_player_1] = 2000;
+        num_of_color_occurence[color_of_player_2] = 2000;
+        // nun tatsächlich für die kleinste farbe entscheiden
+
+        // setze die zahl der gewählten farbe extra so hoch, dass sie auf jeden fall von
+        // einer tatsächlichen farbe abgelöst wird
+        int chosen_color = 20;
+        int min = 20;
+        for (int i = 0; i < num_of_color_occurence.length; i++) {
+            //
+            if (num_of_color_occurence[i] < min) {
+                chosen_color = i;
+                min = num_of_color_occurence[i];
+                // wenn es eine zahl gibt die genau so selten vorkommt wie das derzeitige
+                // minimum
+            } else if (num_of_color_occurence[i] == min) {
+                // dann schau ob das eine kleinere zahl ist
+                if (i < chosen_color) {
+                    chosen_color = i;
+                    min = num_of_color_occurence[i];
+                }
+            }
+
+        }
+
+        // füge nun die felder mit der neuen farbe zu der komponente hinzu
+
+        // gehe alle felder durch, die in der komponente enthalten sind
+        for (int i = 0; i < component_player_2.size(); i++) {
+            Field field = component_player_2.get(i);
+            // setze die farbe von der komponente auf die neu gewählte farbe
+            field.setColor(chosen_color);
+            setColor_of_player_2(chosen_color);
+            // schau dir die nachbarn von dem aktuellen feld an
+            List<Field> neighbours = getNeighbors(field);
+
+            for (Field neighbour : neighbours) {
+                // wenn das feld noch nicht zu einer der komponenten gehört
+                if (!component_player_2.contains(neighbour) && !component_player_2.contains(neighbour)) {
+                    // und das feld die neue farbe hat
+                    if (neighbour.getColor() == chosen_color) {
+                        // dann füge es zur komponente hinzu
+                        component_player_2.add(neighbour);
+                        // setze die aktuelle farbe von s2 auf die gewählte farbe
+                        setColor_of_player_2(chosen_color);
+                    }
+                }
+            }
+            frame.getAnzeigetafel().repaint();
+        }
+        p2_ist_dran = false;
+        p1_ist_dran = true;
+    }
+
+    // ziel: die farbe wählen, die komponente maximal vergrößert
+    // bei mehreren: kleinste farbe wählen
+    private void Greedy() {
+
+        // finde raus, wie oft jede farbe vorkommt (gespeichert in
+        // num_of_color_occurence array)
+        getNumOfOccurenceOfColors();
+        num_of_color_occurence[color_of_player_1] = -2000;
+        num_of_color_occurence[color_of_player_2] = -2000;
+
+        // nun tatsächlich für die größte farbe entscheiden
+
+        // setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
+        // von
+        // einer tatsächlichen farbe abgelöst wird
+        int chosen_color = -20;
+        int max = -20;
+        for (int i = 0; i < num_of_color_occurence.length; i++) {
+            //
+            if (num_of_color_occurence[i] > max) {
+                chosen_color = i;
+                max = num_of_color_occurence[i];
+                // wenn es eine zahl gibt die genau so selten vorkommt wie das derzeitige
+                // minimum
+            } else if (num_of_color_occurence[i] == max) {
+                // dann schau ob das eine kleinere zahl ist
+                if (i < chosen_color) {
+                    chosen_color = i;
+                    max = num_of_color_occurence[i];
+                }
+            }
+
+        }
+
+        // füge nun die felder mit der neuen farbe zu der komponente hinzu
+
+        // gehe alle felder durch, die in der komponente enthalten sind
+        for (int i = 0; i < component_player_2.size(); i++) {
+            Field field = component_player_2.get(i);
+            // setze die farbe von der komponente auf die neu gewählte farbe
+            field.setColor(chosen_color);
+            setColor_of_player_2(chosen_color);
+            // schau dir die nachbarn von dem aktuellen feld an
+            List<Field> neighbours = getNeighbors(field);
+
+            for (Field neighbour : neighbours) {
+                // wenn das feld noch nicht zu einer der komponenten gehört
+                if (!component_player_2.contains(neighbour) && !component_player_2.contains(neighbour)) {
+                    // und das feld die neue farbe hat
+                    if (neighbour.getColor() == chosen_color) {
+                        // dann füge es zur komponente hinzu
+                        component_player_2.add(neighbour);
+                        // setze die aktuelle farbe von s2 auf die gewählte farbe
+                        setColor_of_player_2(chosen_color);
+                    }
+                }
+            }
+            frame.getAnzeigetafel().repaint();
+        }
+        p2_ist_dran = false;
+        p1_ist_dran = true;
+    }
+
+    // ziel: die farbe wählen, die eigentlich die fläche von s1 am meisten
+    // vergrößern würde
+    // bei mehreren: kleinste farbe wählen
+    private int Blocking() {
+        // abfangen: nicht die farbe von s1
+
+        // return zahl der farbe, die s2 als nächstes wählt
+        return 0;
+    }
+
+    // Hilfsmethode: holt die nachbarn eines feldes
+    private ArrayList<Field> getNeighbors(Field field) {
+        ArrayList<Field> neighbours = new ArrayList<>();
         int row = field.getRow();
         int col = field.getCol();
 
@@ -243,57 +425,72 @@ public class Board {
         return neighbours;
     }
 
-    public void extendComponent(ArrayList<Field> component, int selected_color) {
+    // Hilfsmethode: holt alle nachbarn einer komponente
+    private ArrayList<Field> getNeighboursOfComponent(ArrayList<Field> component) {
 
-        // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
-        if (checkIfColorSelectionIsValid(selected_color)) {
+        // neue liste erstellen, in der die nachbarn der komponente gespeichert werden
+        ArrayList<Field> neighbours_of_component = new ArrayList<>();
 
-            // kopie von der komponente, an der die änderungen vorgenommen werden
-            ArrayList<Field> updatedComponent = new ArrayList<>(component);
+        // gehe alle felder in der komponente durch
+        for (Field f : component) {
+            // schau dir die nachbarn von dem aktuellen feld an
+            List<Field> neighbours = getNeighbors(f);
 
-            // gehe alle felder durch, die in der komponente enthalten sind
-            for (int i = 0; i < updatedComponent.size(); i++) {
-                Field field = updatedComponent.get(i);
-
-                // 1 sekunde puffer bis sich die farbe verändert
-                try {
-                    Thread.sleep(1000);
-                    field.setColor(selected_color);
-                    color_of_player_1 = selected_color;
-                    frame.getAnzeigetafel().repaint();
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-
-                // schau dir die nachbarn von dem aktuellen feld an
-                List<Field> neighbours = getNeighbors(field);
-
-                for (Field neighbour : neighbours) {
-                    // füge den nachbarn zur komponente hinzu, falls
-                    // - er nicht schon in der komponente drin ist
-                    // - er die ausgewählte farbe hat
-                    if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
-                        neighbour.setColor(selected_color);
-                        color_of_player_1 = selected_color;
-                        updatedComponent.add(neighbour);
-                        frame.getAnzeigetafel().repaint();
-                    }
+            // gehe alle diese nachbarn durch
+            for (Field neighbour : neighbours) {
+                // wenn
+                // - der nachbar bereits in der neighbours_of_component liste enthalten ist
+                // - oder der nachbar in der komponente enthalten ist
+                // dann füge ihn nicht hinzu. ansonsten füge ihn hinzu
+                if (!neighbours_of_component.contains(neighbour) && !component.contains(neighbour)) {
+                    neighbours_of_component.add(neighbour);
                 }
             }
-            component_player_1 = updatedComponent;
-        } else {
-            System.out.println("Du hast eine ungültige Farbe gewählt.");
         }
+        return neighbours_of_component;
     }
 
-    // hilfsmethode, die geprüft wird, wenn der spieler einen zug machen will
+    // Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
+    // vorkommen
+    private void getNumOfOccurenceOfColors() {
+        // erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
+        // enthält
+        num_of_color_occurence = new int[selectedColors.size()];
+
+        // hol dir alle nachbarn der komponente
+        ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component_player_2);
+
+        // laufe alle nachbarn der komponente durch
+        for (Field neighbour : neighbours_of_component) {
+
+            // wenn nicht -> feld ist valide
+            if (!component_player_1.contains(neighbour) && !component_player_2.contains(neighbour)) {
+
+                num_of_color_occurence[neighbour.getColor()]++;
+            }
+        }
+
+        // for (int i = 0; i < num_of_color_occurence.length; i++) {
+        // System.out.println("color: " + i + " num of occ: " +
+        // num_of_color_occurence[i]);
+        // }
+    }
+
+    private void addFieldToComponentOfPlayer1(Field field) {
+        component_player_1.add(field);
+    }
+
+    private void addFieldToComponentOfPlayer2(Field field) {
+        component_player_2.add(field);
+    }
+
+    // hilfsmethode, die geprüft wird, wenn spieler 1 einen zug machen will
     private boolean checkIfColorSelectionIsValid(int selected_color) {
         // Fall 1: s1 ist dran
         // s1 darf nicht die eigene farbe nochmal wählen
         // s1 darf nicht die farbe seines gegners wählen
         // if (board.isP1_ist_dran()) {
         if (selected_color != getColor_of_player_1() && selected_color != getColor_of_player_2()) {
-            // color_of_player_1 = selected_color;
             return true;
         } else {
             return false;
@@ -457,14 +654,6 @@ public class Board {
 
     public static void setIs_start_klar(boolean is_start_klar) {
         Board.is_start_klar = is_start_klar;
-    }
-
-    public boolean isIs_first_move() {
-        return is_first_move;
-    }
-
-    public void setIs_first_move(boolean is_first_move) {
-        this.is_first_move = is_first_move;
     }
 
 }

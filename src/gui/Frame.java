@@ -14,9 +14,14 @@ public class Frame extends JFrame {
         // Set the size and minimum size of the JFrame
         setSize(new Dimension(600, 600));
         setMinimumSize(new Dimension(600, 600));
+        // setMaximumSize(new Dimension(1000, 1000));
 
         menuetafel = new Menuetafel(this);
+        // menuetafel.setPreferredSize(new Dimension((int) (getWidth() * 0.3),
+        // getHeight()));
         anzeigetafel = new Anzeigetafel(this);
+        // anzeigetafel.setPreferredSize(new Dimension((int) (getWidth() * 0.7),
+        // getHeight()));
         GridLayout gridLayout = new GridLayout(1, 2);
         setLayout(gridLayout);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

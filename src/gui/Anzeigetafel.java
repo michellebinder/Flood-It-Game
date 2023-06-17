@@ -20,13 +20,11 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     private int fieldSize;
     private int farbe_fuer_naechsten_zug;
     private Frame frame;
-    private boolean farbe_wurde_ausgewaehlt;
     private ArrayList<Field> legende;
     private boolean is_color_change_enabled = true;
     private JLabel current_player_anzeige_lbl;
 
     public Anzeigetafel(Frame frame) {
-
         this.frame = frame;
         setBackground(Color.white);
 
@@ -59,6 +57,12 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
                     height / frame.getMenuetafel().getSelected_num_of_rows());
 
+            int max_field_size = 70;
+            // if (fieldSize > max_field_size) {
+            // fieldSize = max_field_size;
+            // }
+
+            // System.out.println("feldgröße: " + fieldSize);
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
                 for (int j = 0; j < frame.getMenuetafel().getSelected_num_of_cols(); j++) {
@@ -81,14 +85,24 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             // TODO: nachfragen, wieso das sich nicht richtig ändert mit repaint
             // immer sobald sich ändert wer dran ist anpassen
-            if (frame.getMenuetafel().getSelected_starting_player().equals("S1 beginnt")) {
+            // if (frame.getMenuetafel().getSelected_starting_player().equals("S1 beginnt"))
+            // {
+            // current_player_anzeige_lbl.setText("Du bist dran");
+            // } else if (frame.getMenuetafel().getSelected_starting_player().equals("S2
+            // beginnt")) {
+            // current_player_anzeige_lbl.setText("Der Computer ist dran");
+            // }
+            if (board.isP1_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
                 current_player_anzeige_lbl.setText("Du bist dran");
-            } else if (frame.getMenuetafel().getSelected_starting_player().equals("S2 beginnt")) {
+            } else {
                 current_player_anzeige_lbl.setText("Der Computer ist dran");
             }
 
             /******** LEGENDE *********/
             int legend_field_size = width / 7;
+            // if (legend_field_size > max_field_size) {
+            // legend_field_size = max_field_size;
+            // }
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
             // legende besteht aus 2 zeilen -> in obere zeile sollen (max) 5 elemente
@@ -157,10 +171,29 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                             mouseY >= field.getY_coordinate() && mouseY < field.getY_coordinate() + fieldSize) {
 
                         farbe_fuer_naechsten_zug = field.getColor();
-                        System.out.println("Die ausgewählte Farbe ist " + farbe_fuer_naechsten_zug);
+                        // System.out.println("Die ausgewählte Farbe ist " + farbe_fuer_naechsten_zug);
+                        // TODO: while spiel noch nicht beendet
                         // jetzt soll die komponente evtl erweitert werden
-                        board.extendComponent(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
+                        if (board.isP1_ist_dran()) {
+                            board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
+                        }
+                    }
+                }
+            }
+            // Überprüfe, ob der Klick innerhalb eines Legendenfeldes liegt
+            for (Field f : legende) {
+                if (mouseX >= f.getX_coordinate() && mouseX < f.getX_coordinate() +
+                        fieldSize &&
+                        mouseY >= f.getY_coordinate() && mouseY < f.getY_coordinate() +
+                                fieldSize) {
 
+                    farbe_fuer_naechsten_zug = f.getColor();
+                    // System.out.println("Die ausgewählte Farbe über legende ist " +
+                    // farbe_fuer_naechsten_zug);
+                    // TODO: while spiel noch nicht beendet
+                    // jetzt soll die komponente evtl erweitert werden
+                    if (board.isP1_ist_dran()) {
+                        board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }
                 }
             }
@@ -209,6 +242,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         // erfasse die key events nur dann, wenn das spiel gestartet und play gedrückt
         // wurde
         requestFocusInWindow();
+
         if (frame.getMenuetafel().isStart_btn_is_clicked() &&
                 frame.getMenuetafel().isPlay_btn_is_clicked()) {
             int key = e.getKeyChar() - '0'; // Konvertierung von char zu int
@@ -216,8 +250,19 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 List<Color> selectedColors = board.getSelectedColors();
                 if (key <= selectedColors.size()) {
                     farbe_fuer_naechsten_zug = key - 1;
-                    System.out.println("Die ausgewählte Farbe über tastatur ist: " + farbe_fuer_naechsten_zug);
+                    // System.out.println("Die ausgewählte Farbe über tastatur ist: " +
+                    // farbe_fuer_naechsten_zug);
+                    // TODO: while spiel noch nicht beendet
+                    // jetzt soll die komponente evtl erweitert werden
+                    if (board.isP1_ist_dran()) {
+                        board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
+                    }
+
                 }
+                // } else if (testchar == 's') {
+                // // board.makeMoveS1Player2(board.getComponent_player_2(),
+                // // board.Stagnation());
+                // board.Stagnation();
             }
         }
     }

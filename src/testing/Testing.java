@@ -16,7 +16,7 @@ public class Testing {
 
 	}
 
-	// TODO: fragen ob das so richtig ist
+	// TODO: teil aus board klasse kopieren
 	public boolean isStartklar() {
 		if (Board.isIs_start_klar()) {
 			return true;

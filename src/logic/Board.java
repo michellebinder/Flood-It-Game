@@ -267,7 +267,7 @@ public class Board {
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
-        getNumOfOccurenceOfColors();
+        getNumOfOccurenceOfColors(component_player_2);
         num_of_color_occurence[color_of_player_1] = 2000;
         num_of_color_occurence[color_of_player_2] = 2000;
         // nun tatsächlich für die kleinste farbe entscheiden
@@ -328,7 +328,7 @@ public class Board {
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
-        getNumOfOccurenceOfColors();
+        getNumOfOccurenceOfColors(component_player_2);
         num_of_color_occurence[color_of_player_1] = -2000;
         num_of_color_occurence[color_of_player_2] = -2000;
 
@@ -389,7 +389,64 @@ public class Board {
     // vergrößern würde
     // bei mehreren: kleinste farbe wählen
     private int Blocking() {
-        // abfangen: nicht die farbe von s1
+
+        // finde raus, wie oft jede farbe vorkommt (gespeichert in
+        // num_of_color_occurence array)
+        getNumOfOccurenceOfColors(component_player_1);
+        num_of_color_occurence[color_of_player_1] = -2000;
+        num_of_color_occurence[color_of_player_2] = -2000;
+
+        // nun tatsächlich für die größte farbe entscheiden
+
+        // setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
+        // von
+        // einer tatsächlichen farbe abgelöst wird
+        int chosen_color = -20;
+        int max = -20;
+        for (int i = 0; i < num_of_color_occurence.length; i++) {
+            //
+            if (num_of_color_occurence[i] > max) {
+                chosen_color = i;
+                max = num_of_color_occurence[i];
+                // wenn es eine zahl gibt die genau so selten vorkommt wie das derzeitige
+                // minimum
+            } else if (num_of_color_occurence[i] == max) {
+                // dann schau ob das eine kleinere zahl ist
+                if (i < chosen_color) {
+                    chosen_color = i;
+                    max = num_of_color_occurence[i];
+                }
+            }
+
+        }
+
+        // füge nun die felder mit der neuen farbe zu der komponente hinzu
+
+        // gehe alle felder durch, die in der komponente enthalten sind
+        for (int i = 0; i < component_player_2.size(); i++) {
+            Field field = component_player_2.get(i);
+            // setze die farbe von der komponente auf die neu gewählte farbe
+            field.setColor(chosen_color);
+            setColor_of_player_2(chosen_color);
+            // schau dir die nachbarn von dem aktuellen feld an
+            List<Field> neighbours = getNeighbors(field);
+
+            for (Field neighbour : neighbours) {
+                // wenn das feld noch nicht zu einer der komponenten gehört
+                if (!component_player_2.contains(neighbour) && !component_player_2.contains(neighbour)) {
+                    // und das feld die neue farbe hat
+                    if (neighbour.getColor() == chosen_color) {
+                        // dann füge es zur komponente hinzu
+                        component_player_2.add(neighbour);
+                        // setze die aktuelle farbe von s2 auf die gewählte farbe
+                        setColor_of_player_2(chosen_color);
+                    }
+                }
+            }
+            frame.getAnzeigetafel().repaint();
+        }
+        p2_ist_dran = false;
+        p1_ist_dran = true;
 
         // return zahl der farbe, die s2 als nächstes wählt
         return 0;
@@ -452,13 +509,13 @@ public class Board {
 
     // Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
     // vorkommen
-    private void getNumOfOccurenceOfColors() {
+    private void getNumOfOccurenceOfColors(ArrayList<Field> component) {
         // erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
         // enthält
         num_of_color_occurence = new int[selectedColors.size()];
 
         // hol dir alle nachbarn der komponente
-        ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component_player_2);
+        ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component);
 
         // laufe alle nachbarn der komponente durch
         for (Field neighbour : neighbours_of_component) {

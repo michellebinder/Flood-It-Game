@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import logic.Board;
 import logic.Field;
@@ -41,6 +42,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // TODO wenn spiel beendet dann nochmal neu alles leer machen
         // Board und legende erst zeichnen, wenn auf Start-Button geklickt wurde
         if (frame.getMenuetafel().isStart_btn_is_clicked()) {
 
@@ -86,14 +88,14 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             // TODO evtl noch play pause button checken?
             if (board.isP1_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
                 current_player_anzeige_lbl.setText("Du bist dran");
-                repaint();
-            } else if (board.isP2_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
+            } else if (board.isP2_ist_dran() &&
+                    frame.getMenuetafel().isStart_btn_is_clicked()) {
                 current_player_anzeige_lbl.setText("Der Computer ist dran");
-                repaint();
             }
 
             /******** LEGENDE *********/
-            int legend_field_size = width / 7;
+            // int legend_field_size = fieldSize;
+            int legend_field_size = Math.min(width / 6, fieldSize);
             // if (legend_field_size > max_field_size) {
             // legend_field_size = max_field_size;
             // }
@@ -130,11 +132,13 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 g.drawString(Integer.toString(color + 1), legendElementX + legend_field_size / 2,
                         legendElementY + legend_field_size + 15);
             }
-
-        } else
-
-        {
-            // Wenn auf Stop geklickt wird, soll das Board wieder verschwinden
+            // TODO: verschwindet noch nicht wenn das spiel vorbei ist
+            if (board.isIs_end_konfiguration()) {
+                // wenn spiel vorbei ist soll das board wieder verschwinden
+                super.paintComponent(g);
+            }
+        } else {
+            // Wenn auf Stop geklickt wird soll das board wieder verschwinden
             super.paintComponent(g);
         }
 
@@ -171,11 +175,11 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                         if (board.isP1_ist_dran()) {
                             board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                         }
-                        // TODO:
-                        if (farbe_fuer_naechsten_zug == board.getColor_of_player_1()
-                                || farbe_fuer_naechsten_zug == board.getColor_of_player_2()) {
+                        // TODO: überlegen ws ich hiermit bezwecken wollte lol
+                        // if (farbe_fuer_naechsten_zug == board.getColor_of_player_1()
+                        // || farbe_fuer_naechsten_zug == board.getColor_of_player_2()) {
 
-                        }
+                        // }
                     }
                 }
             }

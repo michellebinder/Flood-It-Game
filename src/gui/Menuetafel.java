@@ -21,6 +21,7 @@ public class Menuetafel extends JPanel {
 
     private JButton play_btn;
     private boolean play_btn_is_clicked;
+    private String play_btn_value = "Play";
     private int farbe_fuer_naechsten_zug;
 
     private JLabel starting_player_lbl;
@@ -66,7 +67,6 @@ public class Menuetafel extends JPanel {
 
         starting_player_lbl = new JLabel("Welcher Spieler beginnt?");
         starting_player_dropdown = new JComboBox<>(new String[] { "S1 beginnt", "S2 beginnt" });
-        starting_player_dropdown.setEnabled(true);
 
         num_of_colors_lbl = new JLabel("Mit wie vielen Farben willst du spielen?");
         num_of_colors_dropdown = new JComboBox<>(new Integer[] { 4, 5, 6, 7, 8, 9 });
@@ -96,14 +96,14 @@ public class Menuetafel extends JPanel {
         time_lbl.setBackground(Color.white);
         time_lbl.setBorder(line);
 
-        frame.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                resizeComponents(frame);
-            }
-        });
+        // frame.addComponentListener(new ComponentAdapter() {
+        // @Override
+        // public void componentResized(ComponentEvent e) {
+        // resizeComponents(frame);
+        // }
+        // });
 
-        resizeComponents(frame);
+        // resizeComponents(frame);
 
         bedienungsanleitung_btn.addActionListener(new ActionListener() {
             @Override
@@ -120,10 +120,9 @@ public class Menuetafel extends JPanel {
                     board = new Board(selected_num_of_rows, selected_num_of_cols, frame);
                     frame.getAnzeigetafel().setBoard(board);
                     start_btn_is_clicked = true;
-                    frame.getAnzeigetafel().repaint();
+
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
-
                     // sobald start geklickt wird, wird dem board übergeben wer anfangen soll
                     if (selected_starting_player.equals("S2 beginnt")) {
                         frame.getAnzeigetafel().getBoard().setP2_ist_dran(true);
@@ -132,10 +131,12 @@ public class Menuetafel extends JPanel {
                         frame.getAnzeigetafel().getBoard().setP1_ist_dran(true);
                         frame.getAnzeigetafel().getBoard().setP2_ist_dran(false);
                     }
+                    frame.getAnzeigetafel().repaint();
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
                     start_btn_is_clicked = false;
+                    // TODO rausfinden was das hier soll?
                     frame.getAnzeigetafel().getBoard().setComponent_player_1(null);
                     frame.getAnzeigetafel().getBoard().setComponent_player_2(null);
                     start_btn_value = "Start";
@@ -147,6 +148,7 @@ public class Menuetafel extends JPanel {
                 }
                 setFocusable(true);
                 requestFocusInWindow();
+
             }
         });
 
@@ -181,6 +183,11 @@ public class Menuetafel extends JPanel {
                 if (e.getSource() == starting_player_dropdown) {
                     String selectedItem = (String) starting_player_dropdown.getSelectedItem();
                     selected_starting_player = selectedItem;
+                    // TODO fragen ob sich im start zustand noch das board ändern soll -> wenn ja
+                    // dann in allen actionlistenern adden
+                    // board = new Board(selected_num_of_rows, selected_num_of_cols, frame);
+                    // frame.getAnzeigetafel().setBoard(board);
+                    // frame.getAnzeigetafel().repaint();
                 }
             }
         });

@@ -43,7 +43,17 @@ public class Board {
     private boolean has_valid_starting_fields = false;
 
     private static boolean is_start_klar = false;
-    Timer timer;
+
+    private Timer timer;
+
+    private boolean is_end_konfiguration = false;
+
+    private boolean component_has_grown = false;
+
+    private int num_of_moves_without_growth = 0;
+
+    private int current_size_of_S1;
+    private int current_size_of_S2;
 
     // array to store the num of occurence of each color for strategy
     private int[] num_of_color_occurence;
@@ -146,7 +156,6 @@ public class Board {
                 // anzahl entsprechen
                 if (uniqueColors.size() == selectedColors.size()) {
                     has_valid_num_of_unique_colors = true;
-
                 }
             }
 
@@ -190,60 +199,74 @@ public class Board {
     }
 
     public void makeMoveS1(ArrayList<Field> component, int selected_color) {
+        current_size_of_S1 = component_player_1.size();
+        if (!isEndConfig()) {
+            // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
+            if (checkIfColorSelectionIsValid(selected_color)) {
 
-        // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
-        if (checkIfColorSelectionIsValid(selected_color)) {
+                // kopie von der komponente, an der die änderungen vorgenommen werden
+                ArrayList<Field> updatedComponent = new ArrayList<>(component);
 
-            // kopie von der komponente, an der die änderungen vorgenommen werden
-            ArrayList<Field> updatedComponent = new ArrayList<>(component);
+                // gehe alle felder durch, die in der komponente enthalten sind
+                for (int i = 0; i < updatedComponent.size(); i++) {
+                    Field field = updatedComponent.get(i);
+                    field.setColor(selected_color);
+                    color_of_player_1 = selected_color;
 
-            // gehe alle felder durch, die in der komponente enthalten sind
-            for (int i = 0; i < updatedComponent.size(); i++) {
-                Field field = updatedComponent.get(i);
-                field.setColor(selected_color);
-                color_of_player_1 = selected_color;
+                    // schau dir die nachbarn von dem aktuellen feld an
+                    List<Field> neighbours = getNeighbors(field);
 
-                // schau dir die nachbarn von dem aktuellen feld an
-                List<Field> neighbours = getNeighbors(field);
-
-                for (Field neighbour : neighbours) {
-                    // füge den nachbarn zur komponente hinzu, falls
-                    // - er nicht schon in der komponente drin ist
-                    // - er die ausgewählte farbe hat
-                    if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
-                        neighbour.setColor(selected_color);
-                        color_of_player_1 = selected_color;
-                        updatedComponent.add(neighbour);
-                        frame.getAnzeigetafel().repaint();
-
+                    for (Field neighbour : neighbours) {
+                        // füge den nachbarn zur komponente hinzu, falls
+                        // - er nicht schon in der komponente drin ist
+                        // - er die ausgewählte farbe hat
+                        if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
+                            neighbour.setColor(selected_color);
+                            color_of_player_1 = selected_color;
+                            updatedComponent.add(neighbour);
+                            frame.getAnzeigetafel().repaint();
+                        }
                     }
+                    p1_ist_dran = false;
+                    p2_ist_dran = true;
                 }
-                p1_ist_dran = false;
-                p2_ist_dran = true;
+                // 1 sekunde puffer bis sich die farbe verändert
+                // ausserhalb der for-schleife, damit der puffer für die gesamte komponente
+                // wirklich nur 1 sek ist, statt 1 sek pro field
+                try {
+                    Thread.sleep(1000);
+                    frame.getAnzeigetafel().repaint();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+                component_player_1 = updatedComponent;
+            } else {
+                // popup fenster wenn eine ungültige farbe gewählt wurde
+                JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
             }
-            // 1 sekunde puffer bis sich die farbe verändert
-            // ausserhalb der for-schleife, damit der puffer für die gesamte komponente
-            // wirklich nur 1 sek ist, statt 1 sek pro field
-            try {
-                Thread.sleep(1000);
+            if (!isEndConfig()) {
+                // zug von s2 nach 1 sekunde auslösen
+                timer = new Timer(1000, e -> {
+                    makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
+                    timer.stop();
+                });
+                timer.setRepeats(false);
+                timer.start();
+                frame.getMenuetafel().updateComponentSizeLabels();
+            } else {
+                // popup fenster wenn das spiel vorbei ist
+                JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei");
                 frame.getAnzeigetafel().repaint();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
             }
-            component_player_1 = updatedComponent;
-        } else {
-            // popup fenster wenn eine ungültige farbe gewählt wurde
-            JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
         }
-
-        // zug von s2 nach 1 sekunde auslösen
-        timer = new Timer(1000, e -> {
-            makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
-            timer.stop();
-        });
-        timer.setRepeats(false);
-        timer.start();
-        frame.getMenuetafel().updateComponentSizeLabels();
+        // if (current_size_of_S1 == component_player_1.size()) {
+        // component_has_grown = false;
+        // num_of_moves_without_growth++;
+        // System.out.println("ist gleichgroß geblieben");
+        // System.out.println("anzahl: " + num_of_moves_without_growth);
+        // } else {
+        // num_of_moves_without_growth = 0;
+        // }
     }
 
     public void makeMoveS2(String selected_pc_strategy) {
@@ -396,13 +419,20 @@ public class Board {
     // ziel: die farbe wählen, die eigentlich die fläche von s1 am meisten
     // vergrößern würde
     // bei mehreren: kleinste farbe wählen
-    private int Blocking() {
+    private void Blocking() {
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
         getNumOfOccurenceOfColors(component_player_1);
         num_of_color_occurence[color_of_player_1] = -2000;
         num_of_color_occurence[color_of_player_2] = -2000;
+
+        // System.out.println("board klass //////////////////////////");
+        // for (int i = 0; i < num_of_color_occurence.length; i++) {
+        // System.out.println("color: " + i + " num of occ: " +
+        // num_of_color_occurence[i]);
+        // }
+        // System.out.println("board klass //////////////////////////");
 
         // nun tatsächlich für die größte farbe entscheiden
 
@@ -455,9 +485,6 @@ public class Board {
         }
         p2_ist_dran = false;
         p1_ist_dran = true;
-
-        // return zahl der farbe, die s2 als nächstes wählt
-        return 0;
     }
 
     // Hilfsmethode: holt die nachbarn eines feldes
@@ -534,11 +561,6 @@ public class Board {
                 num_of_color_occurence[neighbour.getColor()]++;
             }
         }
-
-        // for (int i = 0; i < num_of_color_occurence.length; i++) {
-        // System.out.println("color: " + i + " num of occ: " +
-        // num_of_color_occurence[i]);
-        // }
     }
 
     private void addFieldToComponentOfPlayer1(Field field) {
@@ -554,24 +576,36 @@ public class Board {
         // Fall 1: s1 ist dran
         // s1 darf nicht die eigene farbe nochmal wählen
         // s1 darf nicht die farbe seines gegners wählen
-        // if (board.isP1_ist_dran()) {
         if (selected_color != getColor_of_player_1() && selected_color != getColor_of_player_2()) {
             return true;
         } else {
             return false;
         }
-        // Fall 2: s2 (computer) ist dran
-        // s2 darf nicht die eigene farbe nochmal wählen
-        // s2 darf nicht die farbe seines gegners wählen
-        // } else {
-        // if (selected_color != board.getColor_of_player_2() && selected_color !=
-        // board.getColor_of_player_1()) {
-        // return true;
-        // } else {
-        // return false;
-        // }
+    }
 
-        // }
+    private boolean isEndConfig() {
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Field field = board[i][j];
+                if (!component_player_1.contains(field) && !component_player_2.contains(field)) {
+                    return false; // Wenn ein Feld weder zu s1 noch zu s2 gehört, ist es keine Endkonfiguration
+                }
+            }
+        }
+        return true; // Alle Felder gehören entweder zu s1 oder s2
+    }
+
+    // spiel ist vorbei, wenn
+    // - entweder ist es eine endkonfiguration (alle felder gehören zu einer
+    // komponente)
+    // - oder es wurden 4 züge hintereinander gespielt (2 pro spieler) in denen
+    // keine der komponenten größer geworden ist
+    private boolean isGameOver() {
+        // if(is_end_konfiguration || )
+
+        // TODO: add popup wer gewonnen hat, ob unentschieden ist, wer verloren hat
+        return true;
     }
 
     // Getter & Setter
@@ -719,6 +753,46 @@ public class Board {
 
     public static void setIs_start_klar(boolean is_start_klar) {
         Board.is_start_klar = is_start_klar;
+    }
+
+    public Timer getTimer() {
+        return timer;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
+
+    public boolean isIs_end_konfiguration() {
+        return is_end_konfiguration;
+    }
+
+    public void setIs_end_konfiguration(boolean is_end_konfiguration) {
+        this.is_end_konfiguration = is_end_konfiguration;
+    }
+
+    public boolean isComponent_has_grown() {
+        return component_has_grown;
+    }
+
+    public void setComponent_has_grown(boolean component_has_grown) {
+        this.component_has_grown = component_has_grown;
+    }
+
+    public int getNum_of_moves_without_growth() {
+        return num_of_moves_without_growth;
+    }
+
+    public void setNum_of_moves_without_growth(int num_of_moves_without_growth) {
+        this.num_of_moves_without_growth = num_of_moves_without_growth;
+    }
+
+    public int[] getNum_of_color_occurence() {
+        return num_of_color_occurence;
+    }
+
+    public void setNum_of_color_occurence(int[] num_of_color_occurence) {
+        this.num_of_color_occurence = num_of_color_occurence;
     }
 
 }

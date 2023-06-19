@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import logic.Board;
 import logic.Field;
@@ -24,6 +23,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     private ArrayList<Field> legende;
     private boolean is_color_change_enabled = true;
     private JLabel current_player_anzeige_lbl;
+    private int legend_field_size;
 
     public Anzeigetafel(Frame frame) {
         this.frame = frame;
@@ -64,7 +64,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             // fieldSize = max_field_size;
             // }
 
-            // System.out.println("feldgröße: " + fieldSize);
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
                 for (int j = 0; j < frame.getMenuetafel().getSelected_num_of_cols(); j++) {
@@ -78,27 +77,11 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                     // setz für das jeweilige feld die x und y werte
                     board.getBoard()[i][j].setX_coordinate(x);
                     board.getBoard()[i][j].setY_coordinate(y);
-                    // System.out
-                    // .println("feld (" + i + ", " + j + "): x Wert: " +
-                    // board.getBoard()[i][j].getX_coordinate()
-                    // + " y-Wert: " + board.getBoard()[i][j].getY_coordinate());
                 }
             }
 
-            // TODO evtl noch play pause button checken?
-            if (board.isP1_ist_dran() && frame.getMenuetafel().isStart_btn_is_clicked()) {
-                current_player_anzeige_lbl.setText("Du bist dran");
-            } else if (board.isP2_ist_dran() &&
-                    frame.getMenuetafel().isStart_btn_is_clicked()) {
-                current_player_anzeige_lbl.setText("Der Computer ist dran");
-            }
-
             /******** LEGENDE *********/
-            // int legend_field_size = fieldSize;
-            int legend_field_size = Math.min(width / 6, fieldSize);
-            // if (legend_field_size > max_field_size) {
-            // legend_field_size = max_field_size;
-            // }
+            legend_field_size = width / 8;
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
             // legende besteht aus 2 zeilen -> in obere zeile sollen (max) 5 elemente
@@ -132,16 +115,24 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 g.drawString(Integer.toString(color + 1), legendElementX + legend_field_size / 2,
                         legendElementY + legend_field_size + 15);
             }
-            // TODO: verschwindet noch nicht wenn das spiel vorbei ist
-            if (board.isIs_end_konfiguration()) {
-                // wenn spiel vorbei ist soll das board wieder verschwinden
+            // wenn das spiel vorbei ist soll das board wieder verschwinden
+            if (board.isIs_game_over()) {
                 super.paintComponent(g);
             }
+
+            if (board.isP1_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
+                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Du bist dran");
+            } else if (board.isP2_ist_dran() &&
+                    frame.getMenuetafel().isPlay_btn_is_clicked()) {
+                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Der Computer ist dran");
+            }
+            if (board.isIs_game_over()) {
+                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+            }
         } else {
-            // Wenn auf Stop geklickt wird soll das board wieder verschwinden
+            // wenn auf Stop geklickt wird soll das Board wieder verschwinden
             super.paintComponent(g);
         }
-
     }
 
     public void drawLegendElement(Graphics g, Color color, int x, int y, int size) {
@@ -175,31 +166,27 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                         if (board.isP1_ist_dran()) {
                             board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                         }
-                        // TODO: überlegen ws ich hiermit bezwecken wollte lol
-                        // if (farbe_fuer_naechsten_zug == board.getColor_of_player_1()
-                        // || farbe_fuer_naechsten_zug == board.getColor_of_player_2()) {
-
-                        // }
                     }
                 }
             }
             // Überprüfe, ob der Klick innerhalb eines Legendenfeldes liegt
+            boolean colorSelected = false;
             for (Field f : legende) {
-                if (mouseX >= f.getX_coordinate() && mouseX < f.getX_coordinate() +
-                        fieldSize &&
+                if (!colorSelected && mouseX >= f.getX_coordinate() && mouseX < f.getX_coordinate() +
+                        legend_field_size &&
                         mouseY >= f.getY_coordinate() && mouseY < f.getY_coordinate() +
-                                fieldSize) {
-
+                                legend_field_size) {
                     farbe_fuer_naechsten_zug = f.getColor();
-                    // System.out.println("Die ausgewählte Farbe über legende ist " +
-                    // farbe_fuer_naechsten_zug);
-                    // TODO: while spiel noch nicht beendet
+                    // System.out.println("Die ausgewählte Farbe über legende ist " + f.getColor());
                     // jetzt soll die komponente evtl erweitert werden
                     if (board.isP1_ist_dran()) {
                         board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }
+                    colorSelected = true;
                 }
             }
+
+            // System.out.println("ende legende");
         }
     }
 

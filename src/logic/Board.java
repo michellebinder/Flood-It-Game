@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -46,7 +47,7 @@ public class Board {
 
     private Timer timer;
 
-    private boolean is_end_konfiguration = false;
+    // private boolean is_end_konfiguration = false;
 
     private boolean component_has_grown = false;
 
@@ -54,6 +55,8 @@ public class Board {
 
     private int current_size_of_S1;
     private int current_size_of_S2;
+
+    private boolean is_game_over = false;
 
     // array to store the num of occurence of each color for strategy
     private int[] num_of_color_occurence;
@@ -152,22 +155,16 @@ public class Board {
                 if (!uniqueColors.contains(board[i][j].getColor())) {
                     uniqueColors.add(board[i][j].getColor());
                 }
-                // wenn die tatsächlichen farben auf dem brett der vom nutzer ausgewählten
-                // anzahl entsprechen
+                // (2) Wenn es t viele Farben im Spiel gibt, gibt es auch t viele Farben im
+                // Spielbrett.
                 if (uniqueColors.size() == selectedColors.size()) {
                     has_valid_num_of_unique_colors = true;
                 }
             }
-
-            if (has_valid_neighbours && has_valid_num_of_unique_colors && has_valid_starting_fields) {
-                is_start_klar = true;
-            } else {
-                is_start_klar = false;
-            }
         }
 
-        // Anforderung 3: Das Feld in der Ecke links unten hat nicht die gleiche Farbe
-        // wie das Feld in der Ecke rechts oben.
+        // (3) Das Feld in der Ecke links unten hat nicht die gleiche Farbe wie das Feld
+        // in der Ecke rechts oben
         Field upper_right_field = board[0][board[0].length - 1];
         Field lower_left_field = board[board.length - 1][0];
         // wenn das feld oben rechts und unten links ne andere farbe haben
@@ -175,6 +172,14 @@ public class Board {
             has_valid_starting_fields = true;
             addFieldToComponentOfPlayer1(lower_left_field);
             addFieldToComponentOfPlayer2(upper_right_field);
+        } else {
+            has_valid_starting_fields = false;
+        }
+
+        if (has_valid_neighbours && has_valid_num_of_unique_colors && has_valid_starting_fields) {
+            is_start_klar = true;
+        } else {
+            is_start_klar = false;
         }
     }
 
@@ -199,8 +204,11 @@ public class Board {
     }
 
     public void makeMoveS1(ArrayList<Field> component, int selected_color) {
+
         current_size_of_S1 = component_player_1.size();
+
         if (!isEndConfig()) {
+
             // prüfe, ob die ausgewählte farbe valide ist -> wenn nicht, gib meldung zurück
             if (checkIfColorSelectionIsValid(selected_color)) {
 
@@ -215,7 +223,6 @@ public class Board {
 
                     // schau dir die nachbarn von dem aktuellen feld an
                     List<Field> neighbours = getNeighbors(field);
-
                     for (Field neighbour : neighbours) {
                         // füge den nachbarn zur komponente hinzu, falls
                         // - er nicht schon in der komponente drin ist
@@ -227,6 +234,7 @@ public class Board {
                             frame.getAnzeigetafel().repaint();
                         }
                     }
+                    frame.getAnzeigetafel().repaint();
                     p1_ist_dran = false;
                     p2_ist_dran = true;
                 }
@@ -240,11 +248,16 @@ public class Board {
                     Thread.currentThread().interrupt();
                 }
                 component_player_1 = updatedComponent;
-            } else {
-                // popup fenster wenn eine ungültige farbe gewählt wurde
-                JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
-            }
-            if (!isEndConfig()) {
+
+                // Überprüfe, ob sich die Komponente vergrößert hat
+                if (component_player_1.size() == current_size_of_S1) {
+                    num_of_moves_without_growth++;
+                } else {
+                    num_of_moves_without_growth = 0;
+                }
+                if (num_of_moves_without_growth == 4) {
+                    showPopUpAfter4InvalidMoves();
+                }
                 // zug von s2 nach 1 sekunde auslösen
                 timer = new Timer(1000, e -> {
                     makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
@@ -254,38 +267,35 @@ public class Board {
                 timer.start();
                 frame.getMenuetafel().updateComponentSizeLabels();
             } else {
-                // popup fenster wenn das spiel vorbei ist
-                JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei");
-                frame.getAnzeigetafel().repaint();
+                // popup fenster wenn eine ungültige farbe gewählt wurde
+                JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
             }
+        } else {
+            showPopUpWhenGameIsOver();
         }
-        // if (current_size_of_S1 == component_player_1.size()) {
-        // component_has_grown = false;
-        // num_of_moves_without_growth++;
-        // System.out.println("ist gleichgroß geblieben");
-        // System.out.println("anzahl: " + num_of_moves_without_growth);
-        // } else {
-        // num_of_moves_without_growth = 0;
-        // }
     }
 
     public void makeMoveS2(String selected_pc_strategy) {
         // gewaährleistet das s2 erst einen move macht, wenn s1 einen validen mpve
         // gemacht hat
-        if (p2_ist_dran == true) {
-            if (selected_pc_strategy.equals("Stagnation")) {
-                Stagnation();
-            } else if (selected_pc_strategy.equals("Greedy")) {
-                Greedy();
-            } else if (selected_pc_strategy.equals("Blocking")) {
-                Blocking();
+        if (!isEndConfig()) {
+            if (p2_ist_dran == true) {
+                if (selected_pc_strategy.equals("Stagnation")) {
+                    Stagnation();
+                } else if (selected_pc_strategy.equals("Greedy")) {
+                    Greedy();
+                } else if (selected_pc_strategy.equals("Blocking")) {
+                    Blocking();
+                }
+                try {
+                    Thread.sleep(1000);
+                    frame.getAnzeigetafel().repaint();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
             }
-            try {
-                Thread.sleep(1000);
-                frame.getAnzeigetafel().repaint();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
+        } else {
+            showPopUpWhenGameIsOver();
         }
         frame.getMenuetafel().updateComponentSizeLabels();
     }
@@ -295,6 +305,8 @@ public class Board {
     // ziel: komponente soll nicht größer werden
     // bei mehreren: kleinste farbe wählen
     private void Stagnation() {
+
+        current_size_of_S2 = component_player_2.size();
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
@@ -347,15 +359,32 @@ public class Board {
                     }
                 }
             }
-            frame.getAnzeigetafel().repaint();
+
+            // Überprüfe, ob sich die Komponente vergrößert hat
+            if (component_player_2.size() == current_size_of_S2) {
+                num_of_moves_without_growth++;
+            } else {
+                num_of_moves_without_growth = 0;
+            }
+            if (num_of_moves_without_growth == 4) {
+                showPopUpAfter4InvalidMoves();
+
+            }
+
+            if (isEndConfig()) {
+                showPopUpWhenGameIsOver();
+            }
         }
         p2_ist_dran = false;
         p1_ist_dran = true;
+
     }
 
     // ziel: die farbe wählen, die komponente maximal vergrößert
     // bei mehreren: kleinste farbe wählen
     private void Greedy() {
+
+        current_size_of_S2 = component_player_2.size();
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
@@ -384,7 +413,6 @@ public class Board {
                     max = num_of_color_occurence[i];
                 }
             }
-
         }
 
         // füge nun die felder mit der neuen farbe zu der komponente hinzu
@@ -411,6 +439,20 @@ public class Board {
                 }
             }
             frame.getAnzeigetafel().repaint();
+            // Überprüfe, ob sich die Komponente vergrößert hat
+            if (component_player_2.size() == current_size_of_S2) {
+                num_of_moves_without_growth++;
+            } else {
+                num_of_moves_without_growth = 0;
+            }
+            if (num_of_moves_without_growth == 4) {
+                showPopUpAfter4InvalidMoves();
+
+            }
+            frame.getAnzeigetafel().repaint();
+        }
+        if (isEndConfig()) {
+            showPopUpWhenGameIsOver();
         }
         p2_ist_dran = false;
         p1_ist_dran = true;
@@ -421,21 +463,14 @@ public class Board {
     // bei mehreren: kleinste farbe wählen
     private void Blocking() {
 
+        current_size_of_S2 = component_player_2.size();
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
         getNumOfOccurenceOfColors(component_player_1);
         num_of_color_occurence[color_of_player_1] = -2000;
         num_of_color_occurence[color_of_player_2] = -2000;
 
-        // System.out.println("board klass //////////////////////////");
-        // for (int i = 0; i < num_of_color_occurence.length; i++) {
-        // System.out.println("color: " + i + " num of occ: " +
-        // num_of_color_occurence[i]);
-        // }
-        // System.out.println("board klass //////////////////////////");
-
         // nun tatsächlich für die größte farbe entscheiden
-
         // setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
         // von
         // einer tatsächlichen farbe abgelöst wird
@@ -482,6 +517,19 @@ public class Board {
                 }
             }
             frame.getAnzeigetafel().repaint();
+            // Überprüfe, ob sich die Komponente vergrößert hat
+            if (component_player_2.size() == current_size_of_S2) {
+                num_of_moves_without_growth++;
+            } else {
+                num_of_moves_without_growth = 0;
+            }
+            if (num_of_moves_without_growth == 4) {
+                showPopUpAfter4InvalidMoves();
+
+            }
+            if (isEndConfig()) {
+                showPopUpWhenGameIsOver();
+            }
         }
         p2_ist_dran = false;
         p1_ist_dran = true;
@@ -596,16 +644,62 @@ public class Board {
         return true; // Alle Felder gehören entweder zu s1 oder s2
     }
 
-    // spiel ist vorbei, wenn
-    // - entweder ist es eine endkonfiguration (alle felder gehören zu einer
-    // komponente)
-    // - oder es wurden 4 züge hintereinander gespielt (2 pro spieler) in denen
-    // keine der komponenten größer geworden ist
-    private boolean isGameOver() {
-        // if(is_end_konfiguration || )
+    public void showPopUpWhenGameIsOver() {
+        // popup fenster wenn das spiel vorbei ist
+        String pop_up_text = "";
+        // popup fenster wenn das spiel vorbei ist
+        if (component_player_1.size() > component_player_2.size()) {
+            pop_up_text = "Du hast gewonnen! Herzlichen Glückwunsch!";
+        } else if (component_player_2.size() > component_player_1.size()) {
+            pop_up_text = "Der Computer hat gewonnen. Vielleicht klappts ja beim nächsten Mal!";
+        } else if (component_player_1.size() == component_player_2.size() || num_of_moves_without_growth == 4) {
+            pop_up_text = "Gleichstand";
+        }
+        is_game_over = true;
+        frame.getMenuetafel().pauseTimer();
+        JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei. " + pop_up_text);
 
-        // TODO: add popup wer gewonnen hat, ob unentschieden ist, wer verloren hat
-        return true;
+        // behavour of menue panel
+
+        frame.getMenuetafel().getStart_btn().setText("Start");
+        frame.getMenuetafel().setStart_btn_is_clicked(false);
+        frame.getMenuetafel().setStart_btn_value("Start");
+
+        frame.getMenuetafel().getPlay_btn().setText("Play");
+        frame.getMenuetafel().setPlay_btn_is_clicked(false);
+        frame.getMenuetafel().enable_buttons();
+        // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
+        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+        frame.getMenuetafel().pauseTimer();
+        frame.getMenuetafel().getTime_lbl().setText("00:00:00");
+        frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
+        frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+        frame.getMenuetafel().repaint();
+        frame.getAnzeigetafel().repaint();
+    }
+
+    private void showPopUpAfter4InvalidMoves() {
+        is_game_over = true;
+        frame.getMenuetafel().pauseTimer();
+        JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei. Gleichstand");
+
+        // behavour of menue panel
+        frame.getMenuetafel().getStart_btn().setText("Start");
+        frame.getMenuetafel().setStart_btn_is_clicked(false);
+        frame.getMenuetafel().setStart_btn_value("Start");
+
+        frame.getMenuetafel().getPlay_btn().setText("Play");
+        frame.getMenuetafel().setPlay_btn_is_clicked(false);
+        frame.getMenuetafel().enable_buttons();
+        // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
+        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+        frame.getMenuetafel().pauseTimer();
+        frame.getMenuetafel().getTime_lbl().setText("00:00:00");
+        frame.getAnzeigetafel().repaint();
+        frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
+        frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+        frame.getMenuetafel().repaint();
+
     }
 
     // Getter & Setter
@@ -763,14 +857,6 @@ public class Board {
         this.timer = timer;
     }
 
-    public boolean isIs_end_konfiguration() {
-        return is_end_konfiguration;
-    }
-
-    public void setIs_end_konfiguration(boolean is_end_konfiguration) {
-        this.is_end_konfiguration = is_end_konfiguration;
-    }
-
     public boolean isComponent_has_grown() {
         return component_has_grown;
     }
@@ -793,6 +879,14 @@ public class Board {
 
     public void setNum_of_color_occurence(int[] num_of_color_occurence) {
         this.num_of_color_occurence = num_of_color_occurence;
+    }
+
+    public boolean isIs_game_over() {
+        return is_game_over;
+    }
+
+    public void setIs_game_over(boolean is_game_over) {
+        this.is_game_over = is_game_over;
     }
 
 }

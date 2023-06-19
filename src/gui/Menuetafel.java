@@ -120,9 +120,9 @@ public class Menuetafel extends JPanel {
                     board = new Board(selected_num_of_rows, selected_num_of_cols, frame);
                     frame.getAnzeigetafel().setBoard(board);
                     start_btn_is_clicked = true;
-
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
+
                     // sobald start geklickt wird, wird dem board übergeben wer anfangen soll
                     if (selected_starting_player.equals("S2 beginnt")) {
                         frame.getAnzeigetafel().getBoard().setP2_ist_dran(true);
@@ -136,9 +136,7 @@ public class Menuetafel extends JPanel {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
                     start_btn_is_clicked = false;
-                    // TODO rausfinden was das hier soll?
-                    frame.getAnzeigetafel().getBoard().setComponent_player_1(null);
-                    frame.getAnzeigetafel().getBoard().setComponent_player_2(null);
+                    resetComponentSizeLabels();
                     start_btn_value = "Start";
                     elapsedTime = 0;
                     updateTimerLabel();
@@ -158,16 +156,26 @@ public class Menuetafel extends JPanel {
                 if (play_btn.getText().equals("Play") && isStart_btn_is_clicked()) {
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
+                    disable_buttons();
                     farbe_fuer_naechsten_zug = frame.getAnzeigetafel().getFarbe_fuer_naechsten_zug();
+
                     // wenn s2 als erster spieler ausgewählt wird dann starte dessen move
                     if (frame.getAnzeigetafel().getBoard().isP2_ist_dran()) {
                         frame.getAnzeigetafel().getBoard().makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
                     }
                     updateComponentSizeLabels();
-                    disable_buttons();
                     startTimer();
+                    // beschriftung wer dran ist
+                    // -> erscheint erst wenn start & play gedrückt wurde
+                    // -> verschwindet wieder wenn spiel vorbei ist
+                    if (board.isP1_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
+                        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Du bist dran");
+                    } else if (board.isP2_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
+                        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Der Computer ist dran");
+                    }
                     frame.getAnzeigetafel().requestFocusInWindow();
                     frame.getAnzeigetafel().requestFocus();
+                    repaint();
                 } else {
                     play_btn.setText("Play");
                     play_btn_is_clicked = false;
@@ -263,20 +271,27 @@ public class Menuetafel extends JPanel {
         timer.start();
     }
 
-    private void pauseTimer() {
+    public void pauseTimer() {
         timer.stop();
     }
 
-    private void updateTimerLabel() {
-        int hours = elapsedTime / 3600;
-        int minutes = (elapsedTime % 3600) / 60;
-        int seconds = elapsedTime % 60;
+    public void updateTimerLabel() {
 
-        String hoursStr = String.format("%02d", hours);
-        String minutesStr = String.format("%02d", minutes);
-        String secondsStr = String.format("%02d", seconds);
+        if (elapsedTime == 0) {
+            time_lbl.setText("00:00:00");
 
-        time_lbl.setText(hoursStr + ":" + minutesStr + ":" + secondsStr);
+        } else {
+
+            int hours = elapsedTime / 3600;
+            int minutes = (elapsedTime % 3600) / 60;
+            int seconds = elapsedTime % 60;
+
+            String hoursStr = String.format("%02d", hours);
+            String minutesStr = String.format("%02d", minutes);
+            String secondsStr = String.format("%02d", seconds);
+
+            time_lbl.setText(hoursStr + ":" + minutesStr + ":" + secondsStr);
+        }
     }
 
     public void updateComponentSizeLabels() {
@@ -284,6 +299,11 @@ public class Menuetafel extends JPanel {
                 + frame.getAnzeigetafel().getBoard().getComponent_player_1().size());
         component_size_s2.setText("Größe der Komponente von S2: "
                 + frame.getAnzeigetafel().getBoard().getComponent_player_2().size());
+    }
+
+    public void resetComponentSizeLabels() {
+        component_size_s1.setText("Größe der Komponente von S1: 0");
+        component_size_s2.setText("Größe der Komponente von S2: 0");
     }
 
     private void disable_buttons() {
@@ -301,7 +321,7 @@ public class Menuetafel extends JPanel {
         pc_strategy_dropdown.setEnabled(false);
     }
 
-    private void enable_buttons() {
+    public void enable_buttons() {
         bedienungsanleitung_btn.setEnabled(true);
         start_btn.setEnabled(true);
         starting_player_lbl.setEnabled(true);

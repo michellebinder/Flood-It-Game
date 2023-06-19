@@ -297,6 +297,9 @@ public class Testing {
 		return chosen_color;
 	}
 
+
+	// s1 fängt an
+	// es ist möglich, innerhalb von höchstens moves vielen Zügen board so zu ändern, dass die Farbverteilung identisch zu der von anotherBoard ist.
 	public boolean toBoard(Field[][] anotherBoard, int moves) {
 
 		return false;

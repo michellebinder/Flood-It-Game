@@ -42,7 +42,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // TODO wenn spiel beendet dann nochmal neu alles leer machen
         // Board und legende erst zeichnen, wenn auf Start-Button geklickt wurde
         if (frame.getMenuetafel().isStart_btn_is_clicked()) {
 
@@ -58,11 +57,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             // berechne die größe eines feldes anhand der zeilen und spaltenanzahl
             fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
                     height / frame.getMenuetafel().getSelected_num_of_rows());
-
-            int max_field_size = 70;
-            // if (fieldSize > max_field_size) {
-            // fieldSize = max_field_size;
-            // }
 
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
@@ -127,6 +121,10 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Der Computer ist dran");
             }
             if (board.isIs_game_over()) {
+                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+            }
+            if (board.getInput() == 0) {
+                frame.getMenuetafel().resetComponentSizeLabels();
                 frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
             }
         } else {
@@ -248,10 +246,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                         board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }
                 }
-                // } else if (testchar == 's') {
-                // // board.makeMoveS1Player2(board.getComponent_player_2(),
-                // // board.Stagnation());
-                // board.Stagnation();
             }
         }
     }

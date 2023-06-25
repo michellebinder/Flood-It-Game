@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -57,6 +55,8 @@ public class Board {
     private int current_size_of_S2;
 
     private boolean is_game_over = false;
+
+    private int input = -1;
 
     // array to store the num of occurence of each color for strategy
     private int[] num_of_color_occurence;
@@ -265,7 +265,14 @@ public class Board {
                 });
                 timer.setRepeats(false);
                 timer.start();
-                frame.getMenuetafel().updateComponentSizeLabels();
+                // updated das label was die komponentengröße anzeigt. wenn spiel vorbei, soll
+                // das wieder auf 0 gesetzt werden
+                if (input == -1) {
+                    frame.getMenuetafel().updateComponentSizeLabels();
+                } else {
+                    frame.getMenuetafel().resetComponentSizeLabels();
+                }
+
             } else {
                 // popup fenster wenn eine ungültige farbe gewählt wurde
                 JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Du hast eine ungültige Farbe gewählt");
@@ -280,11 +287,11 @@ public class Board {
         // gemacht hat
         if (!isEndConfig()) {
             if (p2_ist_dran == true) {
-                if (selected_pc_strategy.equals("Stagnation")) {
+                if (selected_pc_strategy.equals("Strategie 1 (Stagnation)")) {
                     Stagnation();
-                } else if (selected_pc_strategy.equals("Greedy")) {
+                } else if (selected_pc_strategy.equals("Strategie 2 (Greedy)")) {
                     Greedy();
-                } else if (selected_pc_strategy.equals("Blocking")) {
+                } else if (selected_pc_strategy.equals("Strategie 3 (Blocking)")) {
                     Blocking();
                 }
                 try {
@@ -297,7 +304,12 @@ public class Board {
         } else {
             showPopUpWhenGameIsOver();
         }
-        frame.getMenuetafel().updateComponentSizeLabels();
+        if (input == -1) {
+            frame.getMenuetafel().updateComponentSizeLabels();
+        } else {
+            frame.getMenuetafel().resetComponentSizeLabels();
+        }
+
     }
 
     /******** STRATEGIEN VON S2 *********/
@@ -658,7 +670,11 @@ public class Board {
         is_game_over = true;
         frame.getMenuetafel().pauseTimer();
         JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei. " + pop_up_text);
-
+        // int optInt = JOptionPane.show...(..); // Das Öffnen des JOptionPane gibt
+        // einen int zurück und den vergleicht ihr
+        // if(opInt==JOptionPane.OK_OPTION){
+        // showconfirmdialog
+        // }
         // behavour of menue panel
 
         frame.getMenuetafel().getStart_btn().setText("Start");
@@ -676,13 +692,21 @@ public class Board {
         frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
         frame.getMenuetafel().repaint();
         frame.getAnzeigetafel().repaint();
+
     }
 
     private void showPopUpAfter4InvalidMoves() {
         is_game_over = true;
         frame.getMenuetafel().pauseTimer();
-        JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei. Gleichstand");
-
+        // JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei.
+        // Gleichstand");
+        input = JOptionPane.showConfirmDialog(null,
+                "Das Spiel ist vorbei. Gleichstand.", "Game over", JOptionPane.DEFAULT_OPTION);
+        System.out.println("input von option pane " + input);
+        if (input == 0) {
+            frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
+            frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+        }
         // behavour of menue panel
         frame.getMenuetafel().getStart_btn().setText("Start");
         frame.getMenuetafel().setStart_btn_is_clicked(false);
@@ -887,6 +911,14 @@ public class Board {
 
     public void setIs_game_over(boolean is_game_over) {
         this.is_game_over = is_game_over;
+    }
+
+    public int getInput() {
+        return input;
+    }
+
+    public void setInput(int input) {
+        this.input = input;
     }
 
 }

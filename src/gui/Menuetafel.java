@@ -3,8 +3,6 @@ package gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import logic.Board;
@@ -12,6 +10,7 @@ import logic.Board;
 public class Menuetafel extends JPanel {
 
     private Frame frame;
+
     private Board board;
     private JButton bedienungsanleitung_btn;
 
@@ -42,7 +41,7 @@ public class Menuetafel extends JPanel {
 
     private JLabel pc_strategy_lbl;
     private JComboBox<String> pc_strategy_dropdown;
-    private String selected_pc_strategy = "Stagnation"; // default Strategie 1
+    private String selected_pc_strategy = "Strategie 1 (Stagnation)"; // default Strategie 1
 
     private JLabel component_size_s1;
     private JLabel component_size_s2;
@@ -57,9 +56,7 @@ public class Menuetafel extends JPanel {
 
         setBackground(Color.lightGray);
         setLayout(new GridLayout(17, 1));
-
         this.frame = frame;
-        setPreferredSize(new Dimension((int) (frame.getWidth() * 0.3), frame.getHeight()));
 
         bedienungsanleitung_btn = new JButton("Bedienungsanleitung");
         start_btn = new JButton("Start");
@@ -68,26 +65,27 @@ public class Menuetafel extends JPanel {
         starting_player_lbl = new JLabel("Welcher Spieler beginnt?");
         starting_player_dropdown = new JComboBox<>(new String[] { "S1 beginnt", "S2 beginnt" });
 
-        num_of_colors_lbl = new JLabel("Mit wie vielen Farben willst du spielen?");
+        num_of_colors_lbl = new JLabel("Anzahl Farben im Spiel");
         num_of_colors_dropdown = new JComboBox<>(new Integer[] { 4, 5, 6, 7, 8, 9 });
         num_of_colors_dropdown.setSelectedItem(5);
 
-        num_of_rows_lbl = new JLabel("Wie viele Zeilen soll das Spielbrett haben?");
+        num_of_rows_lbl = new JLabel("Anzahl Zeilen im Spiel");
         num_of_rows_dropdown = new JComboBox<>(new Integer[] { 3, 4, 5, 6, 7, 8, 9, 10 });
         num_of_rows_dropdown.setSelectedItem(6);
 
-        num_of_cols_lbl = new JLabel("Wie viele Spalten soll das Spielbrett haben?");
+        num_of_cols_lbl = new JLabel("Anzahl Spalten im Spiel");
         num_of_cols_dropdown = new JComboBox<>(new Integer[] { 3, 4, 5, 6, 7, 8, 9, 10 });
         num_of_cols_dropdown.setSelectedItem(6);
 
-        pc_strategy_lbl = new JLabel("Welche Strategie soll der PC spielen?");
-        pc_strategy_dropdown = new JComboBox<>(new String[] { "Stagnation", "Greedy", "Blocking" });
-        pc_strategy_dropdown.setSelectedItem("Stagnation");
+        pc_strategy_lbl = new JLabel("Welche PC Strategie?");
+        pc_strategy_dropdown = new JComboBox<>(
+                new String[] { "Strategie 1 (Stagnation)", "Strategie 2 (Greedy)", "Strategie 3 (Blocking)" });
+        pc_strategy_dropdown.setSelectedItem("Strategie 1 (Stagnation)");
 
         component_size_s1 = new JLabel(
-                "Größe der Komponente von S1: 0");
+                "Komponentengröße S1: 0");
         component_size_s2 = new JLabel(
-                "Größe der Komponente von S2: 0");
+                "Komponentengröße S2: 0");
 
         timer_lbl = new JLabel("Gespielte Zeit");
         time_lbl = new JLabel("00:00:00"); // Initialer Text der Timer-Anzeige
@@ -95,15 +93,6 @@ public class Menuetafel extends JPanel {
         time_lbl.setOpaque(true);
         time_lbl.setBackground(Color.white);
         time_lbl.setBorder(line);
-
-        // frame.addComponentListener(new ComponentAdapter() {
-        // @Override
-        // public void componentResized(ComponentEvent e) {
-        // resizeComponents(frame);
-        // }
-        // });
-
-        // resizeComponents(frame);
 
         bedienungsanleitung_btn.addActionListener(new ActionListener() {
             @Override
@@ -157,11 +146,18 @@ public class Menuetafel extends JPanel {
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
                     disable_buttons();
-                    farbe_fuer_naechsten_zug = frame.getAnzeigetafel().getFarbe_fuer_naechsten_zug();
 
                     // wenn s2 als erster spieler ausgewählt wird dann starte dessen move
                     if (frame.getAnzeigetafel().getBoard().isP2_ist_dran()) {
-                        frame.getAnzeigetafel().getBoard().makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
+                        // mit 1 sek verzögerung
+                        timer = new Timer(1000, a -> {
+                            frame.getAnzeigetafel().getBoard()
+                                    .makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
+                            timer.stop();
+                        });
+                        timer.setRepeats(false);
+                        timer.start();
+
                     }
                     updateComponentSizeLabels();
                     startTimer();
@@ -191,11 +187,6 @@ public class Menuetafel extends JPanel {
                 if (e.getSource() == starting_player_dropdown) {
                     String selectedItem = (String) starting_player_dropdown.getSelectedItem();
                     selected_starting_player = selectedItem;
-                    // TODO fragen ob sich im start zustand noch das board ändern soll -> wenn ja
-                    // dann in allen actionlistenern adden
-                    // board = new Board(selected_num_of_rows, selected_num_of_cols, frame);
-                    // frame.getAnzeigetafel().setBoard(board);
-                    // frame.getAnzeigetafel().repaint();
                 }
             }
         });
@@ -295,15 +286,15 @@ public class Menuetafel extends JPanel {
     }
 
     public void updateComponentSizeLabels() {
-        component_size_s1.setText("Größe der Komponente von S1: "
+        component_size_s1.setText("Komponentengröße S1: "
                 + frame.getAnzeigetafel().getBoard().getComponent_player_1().size());
-        component_size_s2.setText("Größe der Komponente von S2: "
+        component_size_s2.setText("Komponentengröße S2: "
                 + frame.getAnzeigetafel().getBoard().getComponent_player_2().size());
     }
 
     public void resetComponentSizeLabels() {
-        component_size_s1.setText("Größe der Komponente von S1: 0");
-        component_size_s2.setText("Größe der Komponente von S2: 0");
+        component_size_s1.setText("Komponentengröße S1: 0");
+        component_size_s2.setText("Komponentengröße S2: 0");
     }
 
     private void disable_buttons() {
@@ -334,17 +325,6 @@ public class Menuetafel extends JPanel {
         num_of_cols_dropdown.setEnabled(true);
         pc_strategy_lbl.setEnabled(true);
         pc_strategy_dropdown.setEnabled(true);
-    }
-
-    private void resizeComponents(Frame f) {
-        setPreferredSize(new Dimension((int) (f.getWidth() * 0.3), f.getHeight()));
-        revalidate();
-        repaint();
-
-        // anzeigetafel.setPreferredSize(new Dimension((int) (f.getWidth() * 0.7),
-        // f.getHeight()));
-        // anzeigetafel.revalidate();
-        // anzeigetafel.repaint();
     }
 
     // Getter & Setter

@@ -302,13 +302,18 @@ public class Board {
                 }
             }
         } else {
+            if (input == -1) {
+                frame.getMenuetafel().updateComponentSizeLabels();
+            } else {
+                frame.getMenuetafel().resetComponentSizeLabels();
+            }
             showPopUpWhenGameIsOver();
         }
-        if (input == -1) {
-            frame.getMenuetafel().updateComponentSizeLabels();
-        } else {
-            frame.getMenuetafel().resetComponentSizeLabels();
-        }
+        // if (input == -1) {
+        // frame.getMenuetafel().updateComponentSizeLabels();
+        // } else {
+        // frame.getMenuetafel().resetComponentSizeLabels();
+        // }
 
     }
 
@@ -637,6 +642,9 @@ public class Board {
         // s1 darf nicht die eigene farbe nochmal wählen
         // s1 darf nicht die farbe seines gegners wählen
         if (selected_color != getColor_of_player_1() && selected_color != getColor_of_player_2()) {
+            // System.out.println("die ausgewählte farbe ist: " + selected_color);
+            // System.out.println("die farbe von s1 ist: " + getColor_of_player_1());
+            // System.out.println("die farbe von s2 ist: " + getColor_of_player_2());
             return true;
         } else {
             return false;
@@ -669,14 +677,12 @@ public class Board {
         }
         is_game_over = true;
         frame.getMenuetafel().pauseTimer();
-        JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei. " + pop_up_text);
-        // int optInt = JOptionPane.show...(..); // Das Öffnen des JOptionPane gibt
-        // einen int zurück und den vergleicht ihr
-        // if(opInt==JOptionPane.OK_OPTION){
-        // showconfirmdialog
-        // }
-        // behavour of menue panel
-
+        input = JOptionPane.showConfirmDialog(null,
+                "Das Spiel ist vorbei. " + pop_up_text, "Game over", JOptionPane.DEFAULT_OPTION);
+        if (input == 0) {
+            frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
+            frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
+        }
         frame.getMenuetafel().getStart_btn().setText("Start");
         frame.getMenuetafel().setStart_btn_is_clicked(false);
         frame.getMenuetafel().setStart_btn_value("Start");
@@ -688,8 +694,8 @@ public class Board {
         frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
         frame.getMenuetafel().pauseTimer();
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
-        frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
-        frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+        frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
+        frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         frame.getMenuetafel().repaint();
         frame.getAnzeigetafel().repaint();
 
@@ -698,14 +704,12 @@ public class Board {
     private void showPopUpAfter4InvalidMoves() {
         is_game_over = true;
         frame.getMenuetafel().pauseTimer();
-        // JOptionPane.showMessageDialog(frame.getAnzeigetafel(), "Das Spiel ist vorbei.
-        // Gleichstand");
         input = JOptionPane.showConfirmDialog(null,
                 "Das Spiel ist vorbei. Gleichstand.", "Game over", JOptionPane.DEFAULT_OPTION);
         System.out.println("input von option pane " + input);
         if (input == 0) {
-            frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
-            frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+            frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
+            frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         }
         // behavour of menue panel
         frame.getMenuetafel().getStart_btn().setText("Start");
@@ -720,8 +724,8 @@ public class Board {
         frame.getMenuetafel().pauseTimer();
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
         frame.getAnzeigetafel().repaint();
-        frame.getMenuetafel().getComponent_size_s1().setText("Größe der Komponente von S1: 0");
-        frame.getMenuetafel().getComponent_size_s2().setText("Größe der Komponente von S2: 0");
+        frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
+        frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         frame.getMenuetafel().repaint();
 
     }

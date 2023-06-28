@@ -29,8 +29,10 @@ public class Testing {
 		cols = board[0].length;
 	}
 
+	// Hilfsmethode die eine Kopie von dem übergebenen Board erstellt, damit wir
+	// nicht auf dem "Original" arbeiten müssen
 	private Field[][] copyBoard() {
-		// Tiefe Kopie von initBoard erstellen und in initial_board speichern
+
 		Field[][] copied_board = new Field[rows][cols];
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
@@ -272,123 +274,129 @@ public class Testing {
 		return false;
 	}
 
-	// Hier spielt S1 das Spiel alleine, das heißt, nach jedem Zug von S1 ist S1
-	// wieder dran und darf auch die Farbe wählen, die das Feld oben rechts hat.
-	// Diese berechnet die Anzahl an Zügen, die S1 mindestens braucht, um das
-	// Field-Objekt mit Zeilenindex x und Spaltenindex y einzunehmen (also zum Teil
-	// der eigenen Komponente zu machen), ausgehend von dem in board gespeicherten
-	// Spielbrett. Ist das entsprechende Field- Objekt bereits eingenommen, so wird
-	// der Wert 0 zurück gegeben. Bei der Wahl der Farben muss S1 aufsteigend und
-	// zyklisch vorgehen
 	public int minMoves(int row, int col) {
 
-		// TODO: wenn board bereits einfarbig gefärbt ist -> 0 returnen
-
-		int min_moves = Integer.MAX_VALUE; // Ausgangswert auf maximalen Integer-Wert setzen
+		// zunächst so hoch setzen, das es auf jeden fall von den anzahl zügen abgelöst
+		// wird
+		int min_moves = Integer.MAX_VALUE;
 		int num_of_moves = 0;
-
 		int[] num_of_moves_per_startcolor = new int[6];
 
-		// fange einmal mit jeder startfarbe an
-		for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+		// für den test ob das feld bereits eingenommen ist
+		Field[][] board = copyBoard();
+		ArrayList<Field> comp_s1 = findComponentS1(board);
 
-			// kopie vom ursprünglichen board
-			Field[][] current_board = copyBoard();
-
-			// komponente von s1 im aktuellen board
-			ArrayList<Field> component_s1 = findComponentS1(current_board);
-			int current_color = i;
-
-			// solange s1 noch nicht das ganze feld eingenommen hat mit der aktuellen farbe
-			while (!component_s1.contains(current_board[row][col])) {
-
-				// mach einen move
-				component_s1 = makeMoveS1(component_s1, current_color, current_board);
-
-				num_of_moves++;
-
-				// mach die moves zyklisch von 1-6
-				if (current_color < 6) {
-					current_color++;
-				} else {
-					current_color = 1;
-				}
-			}
-			num_of_moves_per_startcolor[i] = num_of_moves;
-			num_of_moves = 0;
+		// Fall 1: das gesuchte feld ist bereits in der komponente enthalten
+		if (comp_s1.contains(board[row][col])) {
+			return 0;
 		}
 
-		for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
-			int current_min = num_of_moves_per_startcolor[i];
-			if (current_min < min_moves) {
-				min_moves = current_min;
+		// Fall 2: das gesuchte feld ist nicht in der komponente enthalten -> finde die
+		// minimale anzahl an zügen die man zum einnehmen dieses feldes braucht
+		else {
+
+			// fange einmal mit jeder startfarbe an
+			for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+
+				// kopie vom ursprünglichen board
+				Field[][] current_board = copyBoard();
+
+				// komponente von s1 im aktuellen board
+				ArrayList<Field> component_s1 = findComponentS1(current_board);
+				int current_color = i;
+
+				// solange die komponente das gesuchte feld noch nicht enthält
+				while (!component_s1.contains(current_board[row][col])) {
+
+					// mach einen move
+					component_s1 = makeMoveS1(component_s1, current_color, current_board);
+
+					num_of_moves++;
+
+					// mach die moves zyklisch von 1-6
+					if (current_color < 6) {
+						current_color++;
+					} else {
+						current_color = 1;
+					}
+				}
+				num_of_moves_per_startcolor[i] = num_of_moves;
+				num_of_moves = 0;
+			}
+
+			// finde das minimum aus allen startfarben
+			for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+				int current_min = num_of_moves_per_startcolor[i];
+				if (current_min < min_moves) {
+					min_moves = current_min;
+				}
 			}
 		}
 		return min_moves;
 	}
 
-	// Hier spielt S1 das Spiel alleine, das heißt, nach jedem Zug von S1 ist S1
-	// wieder dran und darf auch die Farbe wählen, die das Feld oben rechts hat.
-	// Implementieren Sie die folgende Methode.
-	// Diese berechnet die Anzahl an Zügen, die S1 mindestens braucht, um das
-	// gesamte Spielbrett in einer Farbe zu färben. Dabei darf S1 die Farben nur
-	// zyklisch und aufsteigend sortiert wählen, wobei allerdings nicht festgelegt
-	// ist, mit welcher Farbe S1 beginnt: S1 wählt z.B. als erste Farbe die Farbe 1,
-	// muss aber dann 2, dann 3, bis zur 6 wählen, und beginnt dann wieder von vorne
-	// bei 1, dann 2, und so weiter. Die erste Farbe von S1 könnte aber z.B. auch
-	// die Farbe 3 sein. Die nächste muss dann 4, 5, 6 und anschließend wieder
-	// 1,2,3,4,5,6 und wieder 1, 2, und so weiter sein, bis das Spielbrett eine
-	// Farbe hat. Unter diesen zylkischen Reihenfolgen ermittelt die Methode also
-	// die kleinste Anzahl an Zügen, die notwendig ist, um das Spielbrett in einer
-	// Farbe zu färben.
-	// Ist das Spielbrett bereits einfarbig gefärbt, so wird der Wert 0 zurück
-	// gegeben.
 	public int minMovesFull() {
 
-		// TODO: wenn board bereits einfarbig gefärbt ist -> 0 returnen
-
-		int min_moves = Integer.MAX_VALUE; // Ausgangswert auf maximalen Integer-Wert setzen
+		// zunächst so hoch setzen, das es auf jeden fall von den anzahl zügen abgelöst
+		// wird
+		int min_moves = Integer.MAX_VALUE;
 		int num_of_moves = 0;
-
 		int[] num_of_moves_per_startcolor = new int[6];
 
-		// fange einmal mit jeder startfarbe an
-		for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+		// für den test ob das board bereits einfarbig gefärbt ist
+		Field[][] board = copyBoard();
+		ArrayList<Field> comp_s1 = findComponentS1(board);
+		int rws = board.length;
+		int cls = board[0].length;
 
-			// kopie vom ursprünglichen board
-			Field[][] current_board = copyBoard();
-
-			int rows = current_board.length;
-			int cols = current_board[0].length;
-
-			// komponente von s1 im aktuellen board
-			ArrayList<Field> component_s1 = findComponentS1(current_board);
-			int current_color = i;
-
-			// solange s1 noch nicht das ganze feld eingenommen hat mit der aktuellen farbe
-			while (component_s1.size() != rows * cols) {
-
-				// mach einen move
-				component_s1 = makeMoveS1(component_s1, current_color, current_board);
-
-				num_of_moves++;
-
-				// mach die moves zyklisch von 1-6
-				if (current_color < 6) {
-					current_color++;
-				} else {
-					current_color = 1;
-				}
-			}
-			num_of_moves_per_startcolor[i] = num_of_moves;
-
-			num_of_moves = 0;
+		// Fall 1: das spielbrett ist bereits einfarbig gefärbt -> gib 0 zurück
+		if (comp_s1.size() == rws * cls) {
+			return 0;
 		}
 
-		for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
-			int current_min = num_of_moves_per_startcolor[i];
-			if (current_min < min_moves) {
-				min_moves = current_min;
+		// Fall 2: das spielbrett ist nicht einfarbig gefärbt -> finde die minimale
+		// anzahl an zügen die man zum färben braucht
+		else {
+
+			// fange einmal mit jeder startfarbe an
+			for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+
+				// kopie vom ursprünglichen board
+				Field[][] current_board = copyBoard();
+
+				int rows = current_board.length;
+				int cols = current_board[0].length;
+
+				// komponente von s1 im aktuellen board
+				ArrayList<Field> component_s1 = findComponentS1(current_board);
+				int current_color = i;
+
+				// solange s1 noch nicht das ganze feld eingenommen hat mit der aktuellen farbe
+				while (component_s1.size() != rows * cols) {
+
+					// mach einen move
+					component_s1 = makeMoveS1(component_s1, current_color, current_board);
+
+					num_of_moves++;
+
+					// mach die moves zyklisch von 1-6
+					if (current_color < 6) {
+						current_color++;
+					} else {
+						current_color = 1;
+					}
+				}
+				num_of_moves_per_startcolor[i] = num_of_moves;
+
+				num_of_moves = 0;
+			}
+
+			// finde das minimum aus allen startfarben
+			for (int i = 0; i < num_of_moves_per_startcolor.length; i++) {
+				int current_min = num_of_moves_per_startcolor[i];
+				if (current_min < min_moves) {
+					min_moves = current_min;
+				}
 			}
 		}
 		return min_moves;
@@ -423,6 +431,7 @@ public class Testing {
 		return updatedComponent;
 	}
 
+	// Hilfsmethode die ein board auf der konsole ausgibt
 	public void printBoard(Field[][] currentboard) {
 		for (int i = 0; i < currentboard.length; i++) {
 			for (int j = 0; j < currentboard[0].length; j++) {
@@ -437,9 +446,8 @@ public class Testing {
 		ArrayList<Field> componentS1 = new ArrayList<>();
 		int colorS1;
 
-		// startfeld ist feld unten links
+		// startfeld ist feld unten links -> hinzufügen
 		Field start_field = spielbrett[spielbrett.length - 1][0];
-
 		componentS1.add(start_field);
 
 		// kopie von der komponente, an der die änderungen vorgenommen werden
@@ -473,9 +481,8 @@ public class Testing {
 		ArrayList<Field> componentS2 = new ArrayList<>();
 		int colorS2;
 
-		// startfeld ist feld obenrechts
+		// startfeld ist feld oben rechts -> hinzufügen
 		Field start_field = spielbrett[0][spielbrett[0].length - 1];
-
 		componentS2.add(start_field);
 
 		// kopie von der komponente, an der die änderungen vorgenommen werden
@@ -505,11 +512,11 @@ public class Testing {
 
 	// Hilfsmethode: holt die nachbarn eines feldes
 	private ArrayList<Field> getNeighbors(Field field, Field[][] currentboard) {
+
 		ArrayList<Field> neighbours = new ArrayList<>();
 		int row = field.getRow();
 		int col = field.getCol();
 
-		// Überprüfen der Nachbarn oben, unten, links und rechts
 		// Überprüfen des oberen Nachbarn
 		if (row - 1 >= 0 && row - 1 < currentboard.length && col >= 0 && col < currentboard[row - 1].length) {
 			neighbours.add(currentboard[row - 1][col]);
@@ -586,7 +593,7 @@ public class Testing {
 		// }
 	}
 
-	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
+	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s1 jeweils
 	// vorkommen
 	private int[] getNumOfOccurenceOfColorsS1(ArrayList<Field> component_s1, ArrayList<Field> component_s2,
 			Field[][] currentboard) {
@@ -619,6 +626,22 @@ public class Testing {
 
 	public void setBoard(Field[][] board) {
 		this.board = board;
+	}
+
+	public int getRows() {
+		return rows;
+	}
+
+	public void setRows(int rows) {
+		this.rows = rows;
+	}
+
+	public int getCols() {
+		return cols;
+	}
+
+	public void setCols(int cols) {
+		this.cols = cols;
 	}
 
 }

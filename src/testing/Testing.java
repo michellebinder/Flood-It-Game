@@ -19,38 +19,14 @@ public class Testing {
 	private int rows;
 	private int cols;
 
-	// liste die die komponente von einem spieler darstellt
-	private ArrayList<Field> component_player_1;
-	private ArrayList<Field> component_player_2;
-
-	private int color_of_player_1;
-	private int color_of_player_2;
-
-	// array to store the num of occurence of each color for strategy
-	private int[] num_of_color_occurence;
-
-	private int num_of_colors = 6;
-
 	public Testing(Field[][] initBoard) {
 
 		// vorgegeben
 		this.board = initBoard;
-		// this.initial_board = initBoard;
 
 		// neu hinzugefügt
 		rows = board.length;
 		cols = board[0].length;
-
-		component_player_1 = new ArrayList<Field>();
-		component_player_2 = new ArrayList<Field>();
-
-		// stores the number of the players starting colors
-		color_of_player_1 = board[board.length - 1][0].getColor();
-		component_player_1.add(board[board.length - 1][0]);
-
-		color_of_player_2 = board[0][board[0].length - 1].getColor();
-		component_player_2.add(board[0][board[0].length - 1]);
-
 	}
 
 	private Field[][] copyBoard() {
@@ -66,12 +42,6 @@ public class Testing {
 		return copied_board;
 	}
 
-	// (1) Für jedes Feld aus dem Spielbrett gilt, dass seine Nachbarn eine andere
-	// Farbe haben als das Feld selbst.
-	// (2) Wenn es t viele Farben im Spiel gibt, gibt es auch t viele Farben im
-	// Spielbrett.
-	// (3) Das Feld in der Ecke links unten hat nicht die gleiche Farbe wie das Feld
-	// in der Ecke rechts oben.
 	public boolean isStartklar() {
 
 		// kopie vom board erstellen
@@ -96,6 +66,8 @@ public class Testing {
 			has_valid_starting_fields = true;
 		}
 
+		has_valid_neighbours = true;
+
 		// Anforderung 1: Für jedes Feld aus dem Spielbrett gilt, dass seine Nachbarn
 		// eine andere Farbe haben als das Feld selbst.
 		for (int i = 0; i < currentBoard.length; i++) {
@@ -104,10 +76,9 @@ public class Testing {
 				ArrayList<Field> neighbours = getNeighbors(field, currentBoard);
 
 				for (Field neighbour : neighbours) {
-					if (neighbour.getColor() != field.getColor()) {
-						has_valid_neighbours = true;
-					} else {
+					if (neighbour.getColor() == field.getColor()) {
 						has_valid_neighbours = false;
+						break;
 					}
 				}
 
@@ -116,10 +87,16 @@ public class Testing {
 					uniqueColors.add(currentBoard[i][j].getColor());
 				}
 			}
+
+			// wenn bereits ein nachbar gefunden wurde, der einen ungültigen nachbarn hat,
+			// brich die for schleife ab
+			if (!has_valid_neighbours) {
+				break;
+			}
 		}
 
 		// wenn die tatsächlichen farben auf dem brett 6 entspricht
-		if (uniqueColors.size() == num_of_colors) {
+		if (uniqueColors.size() == 6) {
 			has_valid_num_of_unique_colors = true;
 		}
 
@@ -130,10 +107,6 @@ public class Testing {
 		}
 	}
 
-	// Das Spielbrett befindet sich in einer Endkonfiguration, wenn alle vorhandenen
-	// Felder entweder zur Komponente von S1 oder zur Komponente von S2 gehören. Das
-	// heißt folglich, dass keine der jeweiligen Komponenten mehr vergrößert werden
-	// kann.
 	public boolean isEndConfig() {
 
 		// kopie vom board erstellen
@@ -155,8 +128,6 @@ public class Testing {
 		return true; // Alle Felder gehören entweder zu s1 oder s2
 	}
 
-	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
-	// nächstes wählt
 	// STAGNATION
 	public int testStrategy01() {
 
@@ -169,7 +140,7 @@ public class Testing {
 
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
-		getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
+		int[] num_of_color_occurence = getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
 
 		// -1 weil die bei testing bei 1 anfangen statt bei 0
 		num_of_color_occurence[color_s1 - 1] = 2000;
@@ -201,8 +172,6 @@ public class Testing {
 		return chosen_color;
 	}
 
-	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
-	// nächstes wählt
 	// GREEDY
 	public int testStrategy02() {
 
@@ -215,7 +184,7 @@ public class Testing {
 
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
-		getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
+		int[] num_of_color_occurence = getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
 
 		// -1 weil die bei testing bei 1 anfangen statt bei 0
 		num_of_color_occurence[color_s1 - 1] = -2000;
@@ -248,8 +217,6 @@ public class Testing {
 		return chosen_color;
 	}
 
-	// Diese Methode gibt eine Zahl zurück, die für die Farbe steht, die S2 als
-	// nächstes wählt
 	// BLOCKING
 	public int testStrategy03() {
 
@@ -262,7 +229,7 @@ public class Testing {
 
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
-		getNumOfOccurenceOfColorsS1(component_s1, component_s2, currentboard);
+		int[] num_of_color_occurence = getNumOfOccurenceOfColorsS1(component_s1, component_s2, currentboard);
 
 		// -1 weil die bei testing bei 1 anfangen statt bei 0
 		num_of_color_occurence[color_s1 - 1] = -2000;
@@ -427,33 +394,6 @@ public class Testing {
 		return min_moves;
 	}
 
-	public void makeMoveS1(ArrayList<Field> component, int selected_color) {
-
-		// kopie von der komponente, an der die änderungen vorgenommen werden
-		ArrayList<Field> updatedComponent = new ArrayList<>(component);
-
-		// gehe alle felder durch, die in der komponente enthalten sind
-		for (int i = 0; i < updatedComponent.size(); i++) {
-			Field field = updatedComponent.get(i);
-			field.setColor(selected_color);
-			color_of_player_1 = selected_color;
-
-			// schau dir die nachbarn von dem aktuellen feld an
-			List<Field> neighbours = getNeighbors(field);
-			for (Field neighbour : neighbours) {
-				// füge den nachbarn zur komponente hinzu, falls
-				// - er nicht schon in der komponente drin ist
-				// - er die ausgewählte farbe hat
-				if (!updatedComponent.contains(neighbour) && neighbour.getColor() == selected_color) {
-					neighbour.setColor(selected_color);
-					color_of_player_1 = selected_color;
-					updatedComponent.add(neighbour);
-				}
-			}
-		}
-		component_player_1 = updatedComponent;
-	}
-
 	public ArrayList<Field> makeMoveS1(ArrayList<Field> component, int selected_color, Field[][] currentBoard) {
 
 		// kopie von der komponente, an der die änderungen vorgenommen werden
@@ -564,36 +504,6 @@ public class Testing {
 	}
 
 	// Hilfsmethode: holt die nachbarn eines feldes
-	private ArrayList<Field> getNeighbors(Field field) {
-		ArrayList<Field> neighbours = new ArrayList<>();
-		int row = field.getRow();
-		int col = field.getCol();
-
-		// Überprüfen der Nachbarn oben, unten, links und rechts
-		// Überprüfen des oberen Nachbarn
-		if (row - 1 >= 0 && row - 1 < board.length && col >= 0 && col < board[row - 1].length) {
-			neighbours.add(board[row - 1][col]);
-		}
-
-		// Überprüfen des unteren Nachbarn
-		if (row + 1 >= 0 && row + 1 < board.length && col >= 0 && col < board[row + 1].length) {
-			neighbours.add(board[row + 1][col]);
-		}
-
-		// Überprüfen des linken Nachbarn
-		if (row >= 0 && row < board.length && col - 1 >= 0 && col - 1 < board[row].length) {
-			neighbours.add(board[row][col - 1]);
-		}
-
-		// Überprüfen des rechten Nachbarn
-		if (row >= 0 && row < board.length && col + 1 >= 0 && col + 1 < board[row].length) {
-			neighbours.add(board[row][col + 1]);
-		}
-
-		return neighbours;
-	}
-
-	// Hilfsmethode: holt die nachbarn eines feldes
 	private ArrayList<Field> getNeighbors(Field field, Field[][] currentboard) {
 		ArrayList<Field> neighbours = new ArrayList<>();
 		int row = field.getRow();
@@ -623,31 +533,6 @@ public class Testing {
 	}
 
 	// Hilfsmethode: holt alle nachbarn einer komponente
-	private ArrayList<Field> getNeighboursOfComponent(ArrayList<Field> component) {
-
-		// neue liste erstellen, in der die nachbarn der komponente gespeichert werden
-		ArrayList<Field> neighbours_of_component = new ArrayList<>();
-
-		// gehe alle felder in der komponente durch
-		for (Field f : component) {
-			// schau dir die nachbarn von dem aktuellen feld an
-			List<Field> neighbours = getNeighbors(f);
-
-			// gehe alle diese nachbarn durch
-			for (Field neighbour : neighbours) {
-				// wenn
-				// - der nachbar bereits in der neighbours_of_component liste enthalten ist
-				// - oder der nachbar in der komponente enthalten ist
-				// dann füge ihn nicht hinzu. ansonsten füge ihn hinzu
-				if (!neighbours_of_component.contains(neighbour) && !component.contains(neighbour)) {
-					neighbours_of_component.add(neighbour);
-				}
-			}
-		}
-		return neighbours_of_component;
-	}
-
-	// Hilfsmethode: holt alle nachbarn einer komponente
 	private ArrayList<Field> getNeighboursOfComponent(ArrayList<Field> component, Field[][] currentboard) {
 
 		// neue liste erstellen, in der die nachbarn der komponente gespeichert werden
@@ -674,38 +559,12 @@ public class Testing {
 
 	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
 	// vorkommen
-	private void getNumOfOccurenceOfColors(ArrayList<Field> component) {
-		// erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
-		// enthält
-		num_of_color_occurence = new int[num_of_colors];
-
-		// hol dir alle nachbarn der komponente
-		ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component);
-
-		// laufe alle nachbarn der komponente durch
-		for (Field neighbour : neighbours_of_component) {
-
-			// wenn nicht -> feld ist valide
-			if (!component_player_1.contains(neighbour) && !component_player_2.contains(neighbour)) {
-				// in testing klasse geändert, weil zahlen bei 1 anfangen
-				num_of_color_occurence[neighbour.getColor() - 1]++;
-			}
-		}
-
-		// for (int i = 0; i < num_of_color_occurence.length; i++) {
-		// System.out.println("color: " + i + " num of occ: " +
-		// num_of_color_occurence[i]);
-		// }
-	}
-
-	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
-	// vorkommen
 	private int[] getNumOfOccurenceOfColorsS2(ArrayList<Field> component_s1, ArrayList<Field> component_s2,
 			Field[][] currentboard) {
 
 		// erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
 		// enthält
-		num_of_color_occurence = new int[num_of_colors];
+		int[] num_of_color_occurence = new int[6];
 
 		// hol dir alle nachbarn der komponente von s2
 		ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component_s2, currentboard);
@@ -734,7 +593,7 @@ public class Testing {
 
 		// erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
 		// enthält
-		num_of_color_occurence = new int[num_of_colors];
+		int[] num_of_color_occurence = new int[6];
 
 		// hol dir alle nachbarn der komponente von s2
 		ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component_s1, currentboard);

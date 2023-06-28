@@ -141,64 +141,18 @@ public class Testing {
 	// kann.
 	public boolean isEndConfig() {
 
-		// die beiden startfelder zu den komponenten hinzufügen
-		Field upper_right_field = board[0][board[0].length - 1];
-		Field lower_left_field = board[board.length - 1][0];
-		component_player_1.add(lower_left_field);
-		component_player_2.add(upper_right_field);
+		// kopie vom board erstellen
+		Field[][] currentBoard = copyBoard();
 
-		color_of_player_1 = lower_left_field.getColor();
-		color_of_player_2 = upper_right_field.getColor();
-
-		// kopie von der komponente, an der die änderungen vorgenommen werden
-		ArrayList<Field> updatedComponent_player_1 = new ArrayList<>(component_player_1);
-		ArrayList<Field> updatedComponent_player_2 = new ArrayList<>(component_player_2);
-
-		// befüllung der komponente von s1
-		// gehe alle felder durch, die in der komponente enthalten sind
-		for (int i = 0; i < updatedComponent_player_1.size(); i++) {
-			Field field = updatedComponent_player_1.get(i);
-
-			// schau dir die nachbarn von dem aktuellen feld an
-			List<Field> neighbours = getNeighbors(field);
-
-			for (Field neighbour : neighbours) {
-				// füge den nachbarn zur komponente hinzu, falls
-				// - er nicht schon in der komponente drin ist
-				// - er die ausgewählte farbe hat
-				if (!updatedComponent_player_1.contains(neighbour) && neighbour.getColor() == color_of_player_1) {
-					updatedComponent_player_1.add(neighbour);
-				}
-			}
-
-		}
-		component_player_1 = updatedComponent_player_1;
-
-		// befüllung der komponente von s2
-		// gehe alle felder durch, die in der komponente enthalten sind
-		for (int i = 0; i < updatedComponent_player_2.size(); i++) {
-			Field field = updatedComponent_player_2.get(i);
-
-			// schau dir die nachbarn von dem aktuellen feld an
-			List<Field> neighbours = getNeighbors(field);
-
-			for (Field neighbour : neighbours) {
-				// füge den nachbarn zur komponente hinzu, falls
-				// - er nicht schon in der komponente drin ist
-				// - er die ausgewählte farbe hat
-				if (!updatedComponent_player_2.contains(neighbour) && neighbour.getColor() == color_of_player_2) {
-					updatedComponent_player_2.add(neighbour);
-				}
-			}
-
-		}
-		component_player_2 = updatedComponent_player_2;
+		// hole dir die komponenten von beiden spielern über hilfsmethode
+		ArrayList<Field> component_s1 = findComponentS1(currentBoard);
+		ArrayList<Field> component_s2 = findComponentS2(currentBoard);
 
 		// prüfen ob es sich um eine endkonfiguration handelt
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				Field field = board[i][j];
-				if (!component_player_1.contains(field) && !component_player_2.contains(field)) {
+		for (int i = 0; i < currentBoard.length; i++) {
+			for (int j = 0; j < currentBoard[i].length; j++) {
+				Field field = currentBoard[i][j];
+				if (!component_s1.contains(field) && !component_s2.contains(field)) {
 					return false; // Wenn ein Feld weder zu s1 noch zu s2 gehört, ist es keine Endkonfiguration
 				}
 			}
@@ -768,27 +722,6 @@ public class Testing {
 		// num_of_color_occurence[i]);
 		// }
 
-	}
-
-	private void printComponent1(Field[][] currentboard) {
-		for (int i = 0; i < component_player_1.size(); i++) {
-			int row = component_player_1.get(i).getRow();
-			int col = component_player_1.get(i).getCol();
-			int color = component_player_1.get(i).getColor();
-			System.out.println("comp p1: (" + row + "," + col + "), color: " + color);
-			System.out.println();
-		}
-	}
-
-	private void printComponent(Field[][] currentboard) {
-		var currentcomponent = findComponentS1(currentboard);
-		for (int i = 0; i < currentcomponent.size(); i++) {
-			int row = currentcomponent.get(i).getRow();
-			int col = currentcomponent.get(i).getCol();
-			int color = currentcomponent.get(i).getColor();
-			System.out.println("comp p1: (" + row + "," + col + "), color: " + color);
-			System.out.println();
-		}
 	}
 
 	/*

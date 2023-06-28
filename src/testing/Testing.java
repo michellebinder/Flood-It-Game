@@ -14,7 +14,7 @@ public class Testing {
 
 	private Field[][] board;
 
-	// in testing wird immer mit 6 farben getestet
+	// in testing ist die maximale anzahl an farben immer 6
 
 	// neu hinzugefügt
 	private boolean has_valid_neighbours;
@@ -79,14 +79,22 @@ public class Testing {
 	// in der Ecke rechts oben.
 	public boolean isStartklar() {
 
+		// kopie vom board erstellen
+		Field[][] currentBoard = copyBoard();
+
+		// zunächst alle bedingungen auf false setzen
+		boolean has_valid_neighbours = false;
+		boolean has_valid_num_of_unique_colors = false;
+		boolean has_valid_starting_fields = false;
+
 		// Anforderung 2: Wenn es t viele Farben im Spiel gibt, gibt es auch t viele
 		// Farben im Spielbrett.
 		Set<Integer> uniqueColors = new HashSet<>();
 
 		// Anforderung 3: Das Feld in der Ecke links unten hat nicht die gleiche Farbe
 		// wie das Feld in der Ecke rechts oben.
-		Field upper_right_field = board[0][board[0].length - 1];
-		Field lower_left_field = board[board.length - 1][0];
+		Field upper_right_field = currentBoard[0][currentBoard[0].length - 1];
+		Field lower_left_field = currentBoard[currentBoard.length - 1][0];
 
 		// wenn das feld oben rechts und unten links ne andere farbe haben
 		if (upper_right_field.getColor() != lower_left_field.getColor()) {
@@ -95,22 +103,22 @@ public class Testing {
 
 		// Anforderung 1: Für jedes Feld aus dem Spielbrett gilt, dass seine Nachbarn
 		// eine andere Farbe haben als das Feld selbst.
-		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board[i].length; j++) {
-				Field field = board[i][j];
-				ArrayList<Field> neighbours = getNeighbors(field);
+		for (int i = 0; i < currentBoard.length; i++) {
+			for (int j = 0; j < currentBoard[i].length; j++) {
+				Field field = currentBoard[i][j];
+				ArrayList<Field> neighbours = getNeighbors(field, currentBoard);
 
-				if (neighbours.stream().anyMatch(neighbour -> field.getColor() == neighbour.getColor())) {
-					has_valid_neighbours = false; // Das Feld hat einen Nachbarn mit derselben Farbe, also ist es
-													// ungültig
-				}
-				if (!neighbours.stream().anyMatch(neighbour -> field.getColor() != neighbour.getColor())) {
-					has_valid_neighbours = true; // Das Feld hat gültige Nachbarn
+				for (Field neighbour : neighbours) {
+					if (neighbour.getColor() != field.getColor()) {
+						has_valid_neighbours = true;
+					} else {
+						has_valid_neighbours = false;
+					}
 				}
 
 				// Anforderung 2: checkt, wie viele farben tatsächlich auf dem feld sind
-				if (!uniqueColors.contains(board[i][j].getColor())) {
-					uniqueColors.add(board[i][j].getColor());
+				if (!uniqueColors.contains(currentBoard[i][j].getColor())) {
+					uniqueColors.add(currentBoard[i][j].getColor());
 				}
 			}
 		}
@@ -329,6 +337,9 @@ public class Testing {
 	// der Wert 0 zurück gegeben. Bei der Wahl der Farben muss S1 aufsteigend und
 	// zyklisch vorgehen
 	public int minMoves(int row, int col) {
+
+		// TODO: wenn board bereits einfarbig gefärbt ist -> 0 returnen
+
 		int min_moves = Integer.MAX_VALUE; // Ausgangswert auf maximalen Integer-Wert setzen
 		int num_of_moves = 0;
 
@@ -390,6 +401,8 @@ public class Testing {
 	// gegeben.
 	public int minMovesFull() {
 
+		// TODO: wenn board bereits einfarbig gefärbt ist -> 0 returnen
+
 		int min_moves = Integer.MAX_VALUE; // Ausgangswert auf maximalen Integer-Wert setzen
 		int num_of_moves = 0;
 
@@ -424,7 +437,7 @@ public class Testing {
 				}
 			}
 			num_of_moves_per_startcolor[i] = num_of_moves;
-			System.out.println("ergebnis: " + num_of_moves);
+
 			num_of_moves = 0;
 		}
 

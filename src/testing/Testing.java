@@ -164,13 +164,16 @@ public class Testing {
 		ArrayList<Field> component_s1 = findComponentS1(currentboard);
 		ArrayList<Field> component_s2 = findComponentS2(currentboard);
 
+		int color_s1 = component_s1.get(0).getColor();
+		int color_s2 = component_s2.get(0).getColor();
+
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
 		getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
 
 		// -1 weil die bei testing bei 1 anfangen statt bei 0
-		num_of_color_occurence[color_of_player_1 - 1] = 2000;
-		num_of_color_occurence[color_of_player_2 - 1] = 2000;
+		num_of_color_occurence[color_s1 - 1] = 2000;
+		num_of_color_occurence[color_s2 - 1] = 2000;
 
 		// nun tatsächlich für die kleinste farbe entscheiden
 		// setze die zahl der gewählten farbe extra so hoch, dass sie auf jeden fall von
@@ -202,11 +205,21 @@ public class Testing {
 	// nächstes wählt
 	// GREEDY
 	public int testStrategy02() {
+
+		Field[][] currentboard = copyBoard();
+		ArrayList<Field> component_s1 = findComponentS1(currentboard);
+		ArrayList<Field> component_s2 = findComponentS2(currentboard);
+
+		int color_s1 = component_s1.get(0).getColor();
+		int color_s2 = component_s2.get(0).getColor();
+
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
-		getNumOfOccurenceOfColors(component_player_2);
-		num_of_color_occurence[color_of_player_1] = -2000;
-		num_of_color_occurence[color_of_player_2] = -2000;
+		getNumOfOccurenceOfColorsS2(component_s1, component_s2, currentboard);
+
+		// -1 weil die bei testing bei 1 anfangen statt bei 0
+		num_of_color_occurence[color_s1 - 1] = -2000;
+		num_of_color_occurence[color_s2 - 1] = -2000;
 
 		// nun tatsächlich für die größte farbe entscheiden
 		// setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
@@ -230,6 +243,7 @@ public class Testing {
 			}
 		}
 		int chosen_color = chosen_color_index + 1;
+
 		// weil index bei 0 anfängt aber die zum testen farben von 1-6 nutzen
 		return chosen_color;
 	}
@@ -239,11 +253,20 @@ public class Testing {
 	// BLOCKING
 	public int testStrategy03() {
 
+		Field[][] currentboard = copyBoard();
+		ArrayList<Field> component_s1 = findComponentS1(currentboard);
+		ArrayList<Field> component_s2 = findComponentS2(currentboard);
+
+		int color_s1 = component_s1.get(0).getColor();
+		int color_s2 = component_s2.get(0).getColor();
+
 		// finde raus, wie oft jede farbe vorkommt (gespeichert in
 		// num_of_color_occurence array)
-		getNumOfOccurenceOfColors(component_player_1);
-		num_of_color_occurence[color_of_player_1] = -2000;
-		num_of_color_occurence[color_of_player_2] = -2000;
+		getNumOfOccurenceOfColorsS1(component_s1, component_s2, currentboard);
+
+		// -1 weil die bei testing bei 1 anfangen statt bei 0
+		num_of_color_occurence[color_s1 - 1] = -2000;
+		num_of_color_occurence[color_s2 - 1] = -2000;
 
 		// nun tatsächlich für die größte farbe entscheiden
 		// setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
@@ -706,29 +729,26 @@ public class Testing {
 
 	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s2 jeweils
 	// vorkommen
-	private void getNumOfOccurenceOfColorsForS1Solo(ArrayList<Field> component) {
+	private int[] getNumOfOccurenceOfColorsS1(ArrayList<Field> component_s1, ArrayList<Field> component_s2,
+			Field[][] currentboard) {
+
 		// erstelle ein array was an der stelle i die anzahl der vorkommnisse von zahl i
 		// enthält
 		num_of_color_occurence = new int[num_of_colors];
 
-		// hol dir alle nachbarn der komponente
-		ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component);
+		// hol dir alle nachbarn der komponente von s2
+		ArrayList<Field> neighbours_of_component = getNeighboursOfComponent(component_s1, currentboard);
 
 		// laufe alle nachbarn der komponente durch
 		for (Field neighbour : neighbours_of_component) {
 
 			// wenn nicht -> feld ist valide
-			if (!component_player_1.contains(neighbour)) {
+			if (!component_s1.contains(neighbour) && !component_s2.contains(neighbour)) {
 				// in testing klasse geändert, weil zahlen bei 1 anfangen
-				num_of_color_occurence[neighbour.getColor()]++;
+				num_of_color_occurence[neighbour.getColor() - 1]++;
 			}
 		}
-
-		// for (int i = 1; i < num_of_color_occurence.length; i++) {
-		// System.out.println("color: " + i + " num of occ: " +
-		// num_of_color_occurence[i]);
-		// }
-
+		return num_of_color_occurence;
 	}
 
 	/*

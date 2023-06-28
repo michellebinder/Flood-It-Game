@@ -172,6 +172,7 @@ public class Menuetafel extends JPanel {
                     frame.getAnzeigetafel().requestFocusInWindow();
                     frame.getAnzeigetafel().requestFocus();
                     repaint();
+                    frame.getAnzeigetafel().repaint();
                 } else {
                     play_btn.setText("Play");
                     play_btn_is_clicked = false;
@@ -325,6 +326,13 @@ public class Menuetafel extends JPanel {
         num_of_cols_dropdown.setEnabled(true);
         pc_strategy_lbl.setEnabled(true);
         pc_strategy_dropdown.setEnabled(true);
+    }
+
+    // sorgt dafür das die menütafel immer das richtige verhältnis behält, auch beim
+    // resizen
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension((int) (frame.getWidth() * 0.35), frame.getHeight());
     }
 
     // Getter & Setter

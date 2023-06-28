@@ -1,3 +1,4 @@
+
 package gui;
 
 import java.awt.Color;
@@ -27,6 +28,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
     public Anzeigetafel(Frame frame) {
         this.frame = frame;
+
         setBackground(Color.white);
 
         setFocusable(true);
@@ -51,18 +53,28 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             /******** SPIELFELD *********/
             int originX = 25;
             int originY = 25;
+            // verfügbare breite des panels (abzüglich rand)
             int width = getWidth() - originX * 2;
-            int height = getHeight() - originY * 2;
+            // verfügbare höhe des panels (abzüglich legende und rand)
+            int height = getHeight() - originY * 2 - legend_field_size * 2;
 
             // berechne die größe eines feldes anhand der zeilen und spaltenanzahl
             fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
                     height / frame.getMenuetafel().getSelected_num_of_rows());
 
+            // berechne die Startposition des Spielfelds relativ zur Höhe und Breite des
+            // Panels
+            int board_height = frame.getMenuetafel().getSelected_num_of_rows() * fieldSize;
+            int board_width = frame.getMenuetafel().getSelected_num_of_cols() * fieldSize;
+
+            int startX = (getWidth() - board_width) / 2;
+            int startY = (getHeight() - board_height - legend_field_size * 2) / 2;
+
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
                 for (int j = 0; j < frame.getMenuetafel().getSelected_num_of_cols(); j++) {
-                    int x = originX + j * fieldSize;
-                    int y = originY + i * fieldSize;
+                    int x = startX + j * fieldSize;
+                    int y = startY + i * fieldSize;
                     Color fieldColor = board.getFieldColor(i, j);
                     g.setColor(fieldColor);
                     g.fillRect(x, y, fieldSize, fieldSize);
@@ -75,32 +87,31 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             }
 
             /******** LEGENDE *********/
-            legend_field_size = width / 8;
+
+            // Berechnung der Position der Legende
+            legend_field_size = Math.min(width / 12, fieldSize);
+            int legend_start_x = startX;
+            int legend_start_y = getHeight() - (int) (legend_field_size * 1.7);
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
-            // legende besteht aus 2 zeilen -> in obere zeile sollen (max) 5 elemente
-            int colorsInTopRow = Math.min(selectedColors.size(), 5);
-
-            int legendX = originX + 5; // 5 Pixel Abstand nach links
-            int legendY = originY + frame.getMenuetafel().getSelected_num_of_rows() * fieldSize + 40;
 
             // legende hat so viele elemente wie selected colors
             legende = new ArrayList<Field>(board.getSelectedColors().size());
 
+            // Zeichnen der Legende
             for (int i = 0; i < selectedColors.size(); i++) {
                 Color selectedColor = selectedColors.get(i);
                 int color = selectedColors.indexOf(selectedColor);
                 Field field = new Field(1, i, color);
                 legende.add(field);
-                int currentRow = i / colorsInTopRow; // Zeile berechnen
-                int offsetX = i % colorsInTopRow; // Spalte berechnen
 
-                // x und y position berechnen
-                int legendElementX = legendX + offsetX * (legend_field_size + 5);
-                int legendElementY = legendY + currentRow * (legend_field_size + 20);
+                // Berechnung der Position des Legenden-Elements
+                int legendElementX = legend_start_x + i * (legend_field_size + 5);
+                int legendElementY = legend_start_y;
 
                 // Zeichnen des Legenden-Elements
                 drawLegendElement(g, selectedColor, legendElementX, legendElementY, legend_field_size);
+
                 field.setX_coordinate(legendElementX);
                 field.setY_coordinate(legendElementY);
 
@@ -108,6 +119,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 g.setColor(Color.BLACK);
                 g.drawString(Integer.toString(color + 1), legendElementX + legend_field_size / 2,
                         legendElementY + legend_field_size + 15);
+
             }
             // wenn das spiel vorbei ist soll das board wieder verschwinden
             if (board.isIs_game_over()) {
@@ -145,7 +157,8 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     public void mouseClicked(MouseEvent e) {
 
         // erst auf maus klicks auf dem board reagieren wenn auf play gedrückt wurde
-        if (frame.getMenuetafel().isPlay_btn_is_clicked() && is_color_change_enabled) {
+        if (frame.getMenuetafel().isPlay_btn_is_clicked()) {
+
             requestFocusInWindow();
             int mouseX = e.getX(); // X-Koordinate des Klicks
             int mouseY = e.getY(); // Y-Koordinate des Klicks
@@ -158,9 +171,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                             mouseY >= field.getY_coordinate() && mouseY < field.getY_coordinate() + fieldSize) {
 
                         farbe_fuer_naechsten_zug = field.getColor();
-                        // System.out.println("Die ausgewählte Farbe ist " + farbe_fuer_naechsten_zug);
-                        // TODO: while spiel noch nicht beendet
-                        // jetzt soll die komponente evtl erweitert werden
+                        // zug s1
                         if (board.isP1_ist_dran()) {
                             board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                         }
@@ -175,16 +186,13 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                         mouseY >= f.getY_coordinate() && mouseY < f.getY_coordinate() +
                                 legend_field_size) {
                     farbe_fuer_naechsten_zug = f.getColor();
-                    // System.out.println("Die ausgewählte Farbe über legende ist " + f.getColor());
-                    // jetzt soll die komponente evtl erweitert werden
+                    // zug s1
                     if (board.isP1_ist_dran()) {
                         board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }
                     colorSelected = true;
                 }
             }
-
-            // System.out.println("ende legende");
         }
     }
 
@@ -238,10 +246,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 List<Color> selectedColors = board.getSelectedColors();
                 if (key <= selectedColors.size()) {
                     farbe_fuer_naechsten_zug = key - 1;
-                    // System.out.println("Die ausgewählte Farbe über tastatur ist: " +
-                    // farbe_fuer_naechsten_zug);
-                    // TODO: while spiel noch nicht beendet
-                    // jetzt soll die komponente evtl erweitert werden
+                    // zug s1
                     if (board.isP1_ist_dran()) {
                         board.makeMoveS1(board.getComponent_player_1(), farbe_fuer_naechsten_zug);
                     }

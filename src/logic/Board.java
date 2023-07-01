@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import gui.Frame;
@@ -45,14 +46,9 @@ public class Board {
 
     private Timer timer;
 
-    // private boolean is_end_konfiguration = false;
-
     private boolean component_has_grown = false;
 
     private int num_of_moves_without_growth = 0;
-
-    private int current_size_of_S1;
-    private int current_size_of_S2;
 
     private boolean is_game_over = false;
 
@@ -205,7 +201,8 @@ public class Board {
 
     public void makeMoveS1(ArrayList<Field> component, int selected_color) {
 
-        current_size_of_S1 = component_player_1.size();
+        // speichert die größe der komponente bevor der zug gemacht wurde
+        int old_size = component_player_1.size();
 
         if (!isEndConfig()) {
 
@@ -247,17 +244,26 @@ public class Board {
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
+
                 component_player_1 = updatedComponent;
 
+                // speichert die größe der komponente nachdem der zug gemacht wurde
+                int new_size = component_player_1.size();
+
                 // Überprüfe, ob sich die Komponente vergrößert hat
-                if (component_player_1.size() == current_size_of_S1) {
+                if (old_size == new_size) {
                     num_of_moves_without_growth++;
                 } else {
                     num_of_moves_without_growth = 0;
                 }
-                if (num_of_moves_without_growth == 4) {
-                    showPopUpAfter4InvalidMoves();
-                }
+
+                // sorgt dafür, dass das popup erscheint, nachdem der zug gemacht wurde
+                SwingUtilities.invokeLater(() -> {
+                    if (num_of_moves_without_growth == 4) {
+                        showPopUpAfter4InvalidMoves();
+                    }
+                });
+
                 // zug von s2 nach 1 sekunde auslösen
                 timer = new Timer(1000, e -> {
                     makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
@@ -300,6 +306,7 @@ public class Board {
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
+
             }
         } else {
             if (input == -1) {
@@ -309,29 +316,21 @@ public class Board {
             }
             showPopUpWhenGameIsOver();
         }
-        // if (input == -1) {
-        // frame.getMenuetafel().updateComponentSizeLabels();
-        // } else {
-        // frame.getMenuetafel().resetComponentSizeLabels();
-        // }
-
     }
 
     /******** STRATEGIEN VON S2 *********/
-
-    // ziel: komponente soll nicht größer werden
-    // bei mehreren: kleinste farbe wählen
     private void Stagnation() {
 
-        current_size_of_S2 = component_player_2.size();
+        // speichert die größe der komponente bevor der zug gemacht wurde
+        int old_size = component_player_2.size();
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
         getNumOfOccurenceOfColors(component_player_2);
         num_of_color_occurence[color_of_player_1] = 2000;
         num_of_color_occurence[color_of_player_2] = 2000;
-        // nun tatsächlich für die kleinste farbe entscheiden
 
+        // nun tatsächlich für die kleinste farbe entscheiden
         // setze die zahl der gewählten farbe extra so hoch, dass sie auf jeden fall von
         // einer tatsächlichen farbe abgelöst wird
         int chosen_color = 20;
@@ -354,7 +353,6 @@ public class Board {
         }
 
         // füge nun die felder mit der neuen farbe zu der komponente hinzu
-
         // gehe alle felder durch, die in der komponente enthalten sind
         for (int i = 0; i < component_player_2.size(); i++) {
             Field field = component_player_2.get(i);
@@ -373,35 +371,43 @@ public class Board {
                         component_player_2.add(neighbour);
                         // setze die aktuelle farbe von s2 auf die gewählte farbe
                         setColor_of_player_2(chosen_color);
+                        frame.getAnzeigetafel().repaint();
                     }
                 }
             }
+        }
 
-            // Überprüfe, ob sich die Komponente vergrößert hat
-            if (component_player_2.size() == current_size_of_S2) {
-                num_of_moves_without_growth++;
-            } else {
-                num_of_moves_without_growth = 0;
-            }
-            if (num_of_moves_without_growth == 4) {
-                showPopUpAfter4InvalidMoves();
+        // speichert die größe der komponente nachdem der zug gemacht wurde
+        int new_size = component_player_2.size();
 
-            }
+        // Überprüfe, ob sich die Komponente vergrößert hat
+        if (old_size == new_size) {
+            num_of_moves_without_growth++;
+        } else {
+            num_of_moves_without_growth = 0;
+        }
 
+        frame.getMenuetafel().updateComponentSizeLabels();
+        frame.getAnzeigetafel().repaint();
+
+        // sorgt dafür, dass das popup erscheint, nachdem der zug gemacht wurde
+        SwingUtilities.invokeLater(() -> {
             if (isEndConfig()) {
                 showPopUpWhenGameIsOver();
             }
-        }
+            if (num_of_moves_without_growth == 4) {
+                showPopUpAfter4InvalidMoves();
+            }
+        });
+
         p2_ist_dran = false;
         p1_ist_dran = true;
-
     }
 
-    // ziel: die farbe wählen, die komponente maximal vergrößert
-    // bei mehreren: kleinste farbe wählen
     private void Greedy() {
 
-        current_size_of_S2 = component_player_2.size();
+        // speichert die größe der komponente bevor der zug gemacht wurde
+        int old_size = component_player_2.size();
 
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
@@ -410,7 +416,6 @@ public class Board {
         num_of_color_occurence[color_of_player_2] = -2000;
 
         // nun tatsächlich für die größte farbe entscheiden
-
         // setze die zahl der gewählten farbe extra so niedrig, dass sie auf jeden fall
         // von
         // einer tatsächlichen farbe abgelöst wird
@@ -431,9 +436,7 @@ public class Board {
                 }
             }
         }
-
         // füge nun die felder mit der neuen farbe zu der komponente hinzu
-
         // gehe alle felder durch, die in der komponente enthalten sind
         for (int i = 0; i < component_player_2.size(); i++) {
             Field field = component_player_2.get(i);
@@ -455,32 +458,38 @@ public class Board {
                     }
                 }
             }
-            frame.getAnzeigetafel().repaint();
-            // Überprüfe, ob sich die Komponente vergrößert hat
-            if (component_player_2.size() == current_size_of_S2) {
-                num_of_moves_without_growth++;
-            } else {
-                num_of_moves_without_growth = 0;
+        }
+        // speichert die größe der komponente nachdem der zug gemacht wurde
+        int new_size = component_player_2.size();
+
+        // Überprüfe, ob sich die Komponente vergrößert hat
+        if (old_size == new_size) {
+            num_of_moves_without_growth++;
+        } else {
+            num_of_moves_without_growth = 0;
+        }
+        frame.getMenuetafel().updateComponentSizeLabels();
+        frame.getAnzeigetafel().repaint();
+
+        // sorgt dafür, dass das popup erscheint, nachdem der zug gemacht wurde
+        SwingUtilities.invokeLater(() -> {
+            if (isEndConfig()) {
+                showPopUpWhenGameIsOver();
             }
             if (num_of_moves_without_growth == 4) {
                 showPopUpAfter4InvalidMoves();
-
             }
-            frame.getAnzeigetafel().repaint();
-        }
-        if (isEndConfig()) {
-            showPopUpWhenGameIsOver();
-        }
+        });
+
         p2_ist_dran = false;
         p1_ist_dran = true;
     }
 
-    // ziel: die farbe wählen, die eigentlich die fläche von s1 am meisten
-    // vergrößern würde
-    // bei mehreren: kleinste farbe wählen
     private void Blocking() {
 
-        current_size_of_S2 = component_player_2.size();
+        // speichert die größe der komponente bevor der zug gemacht wurde
+        int old_size = component_player_2.size();
+
         // finde raus, wie oft jede farbe vorkommt (gespeichert in
         // num_of_color_occurence array)
         getNumOfOccurenceOfColors(component_player_1);
@@ -509,9 +518,7 @@ public class Board {
             }
 
         }
-
         // füge nun die felder mit der neuen farbe zu der komponente hinzu
-
         // gehe alle felder durch, die in der komponente enthalten sind
         for (int i = 0; i < component_player_2.size(); i++) {
             Field field = component_player_2.get(i);
@@ -534,20 +541,31 @@ public class Board {
                 }
             }
             frame.getAnzeigetafel().repaint();
-            // Überprüfe, ob sich die Komponente vergrößert hat
-            if (component_player_2.size() == current_size_of_S2) {
-                num_of_moves_without_growth++;
-            } else {
-                num_of_moves_without_growth = 0;
-            }
-            if (num_of_moves_without_growth == 4) {
-                showPopUpAfter4InvalidMoves();
+        }
 
-            }
+        // speichert die größe der komponente nachdem der zug gemacht wurde
+        int new_size = component_player_2.size();
+
+        // Überprüfe, ob sich die Komponente vergrößert hat
+        if (old_size == new_size) {
+            num_of_moves_without_growth++;
+        } else {
+            num_of_moves_without_growth = 0;
+        }
+
+        frame.getMenuetafel().updateComponentSizeLabels();
+        frame.getAnzeigetafel().repaint();
+
+        // sorgt dafür, dass das popup erscheint, nachdem der zug gemacht wurde
+        SwingUtilities.invokeLater(() -> {
             if (isEndConfig()) {
                 showPopUpWhenGameIsOver();
             }
-        }
+            if (num_of_moves_without_growth == 4) {
+                showPopUpAfter4InvalidMoves();
+            }
+        });
+
         p2_ist_dran = false;
         p1_ist_dran = true;
     }
@@ -642,9 +660,6 @@ public class Board {
         // s1 darf nicht die eigene farbe nochmal wählen
         // s1 darf nicht die farbe seines gegners wählen
         if (selected_color != getColor_of_player_1() && selected_color != getColor_of_player_2()) {
-            // System.out.println("die ausgewählte farbe ist: " + selected_color);
-            // System.out.println("die farbe von s1 ist: " + getColor_of_player_1());
-            // System.out.println("die farbe von s2 ist: " + getColor_of_player_2());
             return true;
         } else {
             return false;
@@ -706,7 +721,6 @@ public class Board {
         frame.getMenuetafel().pauseTimer();
         input = JOptionPane.showConfirmDialog(null,
                 "Das Spiel ist vorbei. Gleichstand.", "Game over", JOptionPane.DEFAULT_OPTION);
-        System.out.println("input von option pane " + input);
         if (input == 0) {
             frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
             frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");

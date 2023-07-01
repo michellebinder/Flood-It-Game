@@ -708,6 +708,7 @@ public class Board {
         // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
         frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
         frame.getMenuetafel().pauseTimer();
+        frame.getMenuetafel().setElapsedTime(0);
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
         frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
         frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
@@ -736,7 +737,9 @@ public class Board {
         // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
         frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
         frame.getMenuetafel().pauseTimer();
+        frame.getMenuetafel().setElapsedTime(0);
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
+
         frame.getAnzeigetafel().repaint();
         frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
         frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");

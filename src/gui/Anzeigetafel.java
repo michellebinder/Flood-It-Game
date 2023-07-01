@@ -48,20 +48,20 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         int minimum = Math.min(width, height);
 
         // tatsächlich verfügbare höhe abzüglich der ränder
-        int availableHeight = height - 4 * 40;
+        int available_height = height - 4 * 40;
         // tatsächlich verfügbare breite abzüglich der ränder
-        int availableWidth = width - 2 * 40;
+        int available_width = width - 2 * 40;
 
         fieldSize = minimum / Math.max(frame.getMenuetafel().getSelected_num_of_rows(),
                 frame.getMenuetafel().getSelected_num_of_cols());
 
         // falls die größe des felds den zulässigen rahmen überschreitet wird sie
         // angepasst
-        if (fieldSize > availableHeight / frame.getMenuetafel().getSelected_num_of_rows()
-                || fieldSize > availableWidth / frame.getMenuetafel().getSelected_num_of_cols()) {
+        if (fieldSize > available_height / frame.getMenuetafel().getSelected_num_of_rows()
+                || fieldSize > available_width / frame.getMenuetafel().getSelected_num_of_cols()) {
 
-            fieldSize = Math.min(availableHeight / frame.getMenuetafel().getSelected_num_of_rows(),
-                    availableWidth / frame.getMenuetafel().getSelected_num_of_cols());
+            fieldSize = Math.min(available_height / frame.getMenuetafel().getSelected_num_of_rows(),
+                    available_width / frame.getMenuetafel().getSelected_num_of_cols());
         }
         repaint();
     }

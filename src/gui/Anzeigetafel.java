@@ -40,9 +40,37 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         add(current_player_anzeige_lbl);
     }
 
+    public void calculateFieldSize() {
+
+        int width = getWidth();
+        int height = getHeight();
+
+        int minimum = Math.min(width, height);
+
+        // tatsächlich verfügbare höhe abzüglich der ränder
+        int availableHeight = height - 4 * 40;
+        // tatsächlich verfügbare breite abzüglich der ränder
+        int availableWidth = width - 2 * 40;
+
+        fieldSize = minimum / Math.max(frame.getMenuetafel().getSelected_num_of_rows(),
+                frame.getMenuetafel().getSelected_num_of_cols());
+
+        // falls die größe des felds den zulässigen rahmen überschreitet wird sie
+        // angepasst
+        if (fieldSize > availableHeight / frame.getMenuetafel().getSelected_num_of_rows()
+                || fieldSize > availableWidth / frame.getMenuetafel().getSelected_num_of_cols()) {
+
+            fieldSize = Math.min(availableHeight / frame.getMenuetafel().getSelected_num_of_rows(),
+                    availableWidth / frame.getMenuetafel().getSelected_num_of_cols());
+        }
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        calculateFieldSize();
 
         // Board und legende erst zeichnen, wenn auf Start-Button geklickt wurde
         if (frame.getMenuetafel().isStart_btn_is_clicked()) {
@@ -51,35 +79,23 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             requestFocusInWindow();
 
             /******** SPIELFELD *********/
-            int originX = 25;
-            int originY = 25;
-            // verfügbare breite des panels (abzüglich rand)
-            int width = getWidth() - originX * 2;
-            // verfügbare höhe des panels (abzüglich legende und rand)
-            int height = getHeight() - originY * 2 - legend_field_size * 2;
+
+            int board_width = fieldSize * frame.getMenuetafel().getSelected_num_of_cols();
+            int board_height = fieldSize * frame.getMenuetafel().getSelected_num_of_rows();
+
+            int offsetX = (getWidth() - board_width) / 2;
+            int offsetY = ((getHeight() - board_height) / 2) - 50;
 
             // Wenn das Frame in den Vollbildmodus gebracht wird, soll repainted werden
             if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
                 repaint();
             }
 
-            // // berechne die größe eines feldes anhand der zeilen und spaltenanzahl
-            fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
-                    height / frame.getMenuetafel().getSelected_num_of_rows());
-
-            // berechne die Startposition des Spielfelds relativ zur Höhe und Breite des
-            // Panels
-            int board_height = frame.getMenuetafel().getSelected_num_of_rows() * fieldSize;
-            int board_width = frame.getMenuetafel().getSelected_num_of_cols() * fieldSize;
-
-            int startX = (getWidth() - board_width) / 2;
-            int startY = (getHeight() - board_height - legend_field_size * 2) / 2;
-
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
                 for (int j = 0; j < frame.getMenuetafel().getSelected_num_of_cols(); j++) {
-                    int x = startX + j * fieldSize;
-                    int y = startY + i * fieldSize;
+                    int x = offsetX + j * fieldSize;
+                    int y = offsetY + i * fieldSize;
                     Color fieldColor = board.getFieldColor(i, j);
                     g.setColor(fieldColor);
                     g.fillRect(x, y, fieldSize, fieldSize);
@@ -93,10 +109,13 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             /******** LEGENDE *********/
 
+            int abstand_zwischen_board_und_rand_unten = getHeight() - offsetY - board_height;
+
             // Berechnung der Position der Legende
-            legend_field_size = Math.min(width / 12, fieldSize);
-            int legend_start_x = startX;
-            int legend_start_y = getHeight() - (int) (legend_field_size * 1.7);
+            legend_field_size = Math.min(getWidth() / 15, abstand_zwischen_board_und_rand_unten / 2);
+
+            int legend_start_x = offsetX;
+            int legend_start_y = offsetY + board_height + 5 + (legend_field_size / 2);
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
 

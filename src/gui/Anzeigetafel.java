@@ -1,4 +1,3 @@
-
 package gui;
 
 import java.awt.Color;
@@ -10,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import logic.Board;
@@ -58,7 +58,15 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             // verfügbare höhe des panels (abzüglich legende und rand)
             int height = getHeight() - originY * 2 - legend_field_size * 2;
 
-            // berechne die größe eines feldes anhand der zeilen und spaltenanzahl
+            // wenn das frame in den vollbildmodus gebracht wird soll repainted werden
+            if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
+                repaint();
+                // wenn es vom vollbildmodus wieder zurück in den normalen modus gebracht wird
+                // soll ebenfalls repainted werden
+            } else {
+                repaint();
+            }
+            // // berechne die größe eines feldes anhand der zeilen und spaltenanzahl
             fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
                     height / frame.getMenuetafel().getSelected_num_of_rows());
 

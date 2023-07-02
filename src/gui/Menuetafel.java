@@ -51,7 +51,6 @@ public class Menuetafel extends JPanel {
     private JLabel time_lbl;
     private JLabel timer_lbl;
     LineBorder line;
-    private boolean start_has_been_clicked_once = false;
 
     public Menuetafel(Frame frame) {
 
@@ -112,6 +111,7 @@ public class Menuetafel extends JPanel {
                     start_btn_is_clicked = true;
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
+                    resetComponentSizeLabels();
 
                     // sobald start geklickt wird, wird dem board übergeben wer anfangen soll
                     if (selected_starting_player.equals("S2 beginnt")) {
@@ -142,8 +142,7 @@ public class Menuetafel extends JPanel {
         play_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if ((play_btn.getText().equals("Play") && isStart_btn_is_clicked())
-                        || (play_btn.getText().equals("Play") && start_has_been_clicked_once)) {
+                if (play_btn.getText().equals("Play") && isStart_btn_is_clicked()) {
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
                     disable_buttons();
@@ -172,6 +171,7 @@ public class Menuetafel extends JPanel {
                     }
                     frame.getAnzeigetafel().requestFocusInWindow();
                     frame.getAnzeigetafel().requestFocus();
+
                     repaint();
                     frame.getAnzeigetafel().repaint();
                 } else {
@@ -578,13 +578,4 @@ public class Menuetafel extends JPanel {
     public void setLine(LineBorder line) {
         this.line = line;
     }
-
-    public boolean isStart_has_been_clicked_once() {
-        return start_has_been_clicked_once;
-    }
-
-    public void setStart_has_been_clicked_once(boolean start_has_been_clicked_once) {
-        this.start_has_been_clicked_once = start_has_been_clicked_once;
-    }
-
 }

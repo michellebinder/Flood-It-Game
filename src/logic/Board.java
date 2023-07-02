@@ -83,6 +83,11 @@ public class Board {
             createBoard();
         }
 
+        if (frame.getMenuetafel().isStart_btn_is_clicked()) {
+            component_player_1.clear();
+            component_player_2.clear();
+        }
+
         // stores the number of the players starting colors
         color_of_player_1 = board[rows - 1][0].getColor();
         color_of_player_2 = board[0][cols - 1].getColor();
@@ -710,8 +715,11 @@ public class Board {
         frame.getMenuetafel().pauseTimer();
         frame.getMenuetafel().setElapsedTime(0);
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
+        component_player_1.clear();
+        component_player_2.clear();
         frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
         frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
+
         frame.getMenuetafel().repaint();
         frame.getAnzeigetafel().repaint();
 
@@ -741,6 +749,8 @@ public class Board {
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
 
         frame.getAnzeigetafel().repaint();
+        component_player_1.clear();
+        component_player_2.clear();
         frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
         frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         frame.getMenuetafel().repaint();

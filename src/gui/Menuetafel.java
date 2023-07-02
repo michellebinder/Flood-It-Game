@@ -189,6 +189,7 @@ public class Menuetafel extends JPanel {
                     String selectedItem = (String) starting_player_dropdown.getSelectedItem();
                     selected_starting_player = selectedItem;
                 }
+
             }
         });
 
@@ -199,7 +200,6 @@ public class Menuetafel extends JPanel {
                     int selectedItem = (int) num_of_colors_dropdown.getSelectedItem();
                     selected_num_of_colors = selectedItem;
                 }
-                frame.getAnzeigetafel().calculateFieldSize();
             }
         });
 
@@ -210,7 +210,6 @@ public class Menuetafel extends JPanel {
                     int selectedItem = (int) num_of_rows_dropdown.getSelectedItem();
                     selected_num_of_rows = selectedItem;
                 }
-                frame.getAnzeigetafel().calculateFieldSize();
             }
         });
 
@@ -221,7 +220,6 @@ public class Menuetafel extends JPanel {
                     int selectedItem = (int) num_of_cols_dropdown.getSelectedItem();
                     selected_num_of_cols = selectedItem;
                 }
-                frame.getAnzeigetafel().calculateFieldSize();
             }
         });
 
@@ -579,5 +577,4 @@ public class Menuetafel extends JPanel {
     public void setLine(LineBorder line) {
         this.line = line;
     }
-
 }

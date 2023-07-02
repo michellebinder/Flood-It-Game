@@ -2,8 +2,6 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -39,67 +37,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         addKeyListener(this);
         current_player_anzeige_lbl = new JLabel();
         add(current_player_anzeige_lbl);
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                calculateFieldSize();
-            }
-        });
-
-    }
-
-    public void calculateFieldSize() {
-
-        int width = getWidth();
-        int height = getHeight();
-
-        int minimum = Math.min(width, height);
-
-        // tatsächlich verfügbare höhe abzüglich der ränder
-        int available_height = height - 4 * 40;
-        // tatsächlich verfügbare breite abzüglich der ränder
-        int available_width = width - 2 * 40;
-
-        fieldSize = minimum / Math.max(frame.getMenuetafel().getSelected_num_of_rows(),
-                frame.getMenuetafel().getSelected_num_of_cols());
-
-        // falls die größe des felds den zulässigen rahmen überschreitet wird sie
-        // angepasst
-        if (fieldSize > available_height / frame.getMenuetafel().getSelected_num_of_rows()
-                || fieldSize > available_width / frame.getMenuetafel().getSelected_num_of_cols()) {
-
-            fieldSize = Math.min(available_height / frame.getMenuetafel().getSelected_num_of_rows(),
-                    available_width / frame.getMenuetafel().getSelected_num_of_cols());
-        }
-        repaint();
-    }
-
-    public void calculateFieldSizeFullscreen() {
-
-        int width = getWidth();
-        int height = getHeight();
-
-        int minimum = Math.min(width, height);
-
-        // tatsächlich verfügbare höhe abzüglich der ränder
-        int available_height = height - 4 * 40;
-        // tatsächlich verfügbare breite abzüglich der ränder
-        int available_width = width - 2 * 40;
-
-        fieldSize = minimum / Math.max(frame.getMenuetafel().getSelected_num_of_rows() + 5,
-                frame.getMenuetafel().getSelected_num_of_cols() + 5);
-
-        // falls die größe des felds den zulässigen rahmen überschreitet wird sie
-        // angepasst
-        if (fieldSize > available_height / frame.getMenuetafel().getSelected_num_of_rows()
-                || fieldSize > available_width / frame.getMenuetafel().getSelected_num_of_cols()) {
-
-            fieldSize = Math.min(available_height / frame.getMenuetafel().getSelected_num_of_rows() + 5,
-                    available_width / frame.getMenuetafel().getSelected_num_of_cols() + 5);
-        }
-
-        repaint();
     }
 
     @Override
@@ -114,11 +51,14 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             /******** SPIELFELD *********/
 
-            int board_width = fieldSize * frame.getMenuetafel().getSelected_num_of_cols();
-            int board_height = fieldSize * frame.getMenuetafel().getSelected_num_of_rows();
+            int width = this.getWidth() - 2 * 25;
+            int height = (int) (0.75 * this.getHeight());
 
-            int offsetX = (getWidth() - board_width) / 2;
-            int offsetY = ((getHeight() - board_height) / 2) - 50;
+            fieldSize = Math.min(width / frame.getMenuetafel().getSelected_num_of_cols(),
+                    height / frame.getMenuetafel().getSelected_num_of_rows());
+
+            int offsetX = (this.getWidth() - fieldSize * frame.getMenuetafel().getSelected_num_of_cols()) / 2;
+            int offsetY = (this.getHeight() - (fieldSize * (frame.getMenuetafel().getSelected_num_of_rows() + 2))) / 2;
 
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
@@ -138,13 +78,11 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             /******** LEGENDE *********/
 
-            int abstand_zwischen_board_und_rand_unten = getHeight() - offsetY - board_height;
-
-            // Berechnung der Position der Legende
-            legend_field_size = Math.min(getWidth() / 15, abstand_zwischen_board_und_rand_unten / 2);
+            legend_field_size = Math.min(fieldSize * frame.getMenuetafel().getSelected_num_of_rows(),
+                    fieldSize * frame.getMenuetafel().getSelected_num_of_rows()) / 10;
 
             int legend_start_x = offsetX;
-            int legend_start_y = offsetY + board_height + 5 + (legend_field_size / 2);
+            int legend_start_y = offsetY + (frame.getMenuetafel().getSelected_num_of_rows() + 1) * fieldSize;
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
 

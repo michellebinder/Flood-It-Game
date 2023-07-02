@@ -51,6 +51,7 @@ public class Menuetafel extends JPanel {
     private JLabel time_lbl;
     private JLabel timer_lbl;
     LineBorder line;
+    private boolean start_has_been_clicked_once = false;
 
     public Menuetafel(Frame frame) {
 
@@ -135,14 +136,14 @@ public class Menuetafel extends JPanel {
                 }
                 setFocusable(true);
                 requestFocusInWindow();
-
             }
         });
 
         play_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (play_btn.getText().equals("Play") && isStart_btn_is_clicked()) {
+                if ((play_btn.getText().equals("Play") && isStart_btn_is_clicked())
+                        || (play_btn.getText().equals("Play") && start_has_been_clicked_once)) {
                     play_btn_is_clicked = true;
                     play_btn.setText("Pause");
                     disable_buttons();
@@ -577,4 +578,13 @@ public class Menuetafel extends JPanel {
     public void setLine(LineBorder line) {
         this.line = line;
     }
+
+    public boolean isStart_has_been_clicked_once() {
+        return start_has_been_clicked_once;
+    }
+
+    public void setStart_has_been_clicked_once(boolean start_has_been_clicked_once) {
+        this.start_has_been_clicked_once = start_has_been_clicked_once;
+    }
+
 }

@@ -36,7 +36,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         addMouseListener(this);
         addKeyListener(this);
         current_player_anzeige_lbl = new JLabel();
-        add(current_player_anzeige_lbl);
+        // add(current_player_anzeige_lbl);
     }
 
     @Override

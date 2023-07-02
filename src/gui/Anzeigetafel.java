@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -38,6 +40,13 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         addKeyListener(this);
         current_player_anzeige_lbl = new JLabel();
         add(current_player_anzeige_lbl);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                calculateFieldSize();
+            }
+        });
     }
 
     public void calculateFieldSize() {
@@ -70,8 +79,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        calculateFieldSize();
-
         // Board und legende erst zeichnen, wenn auf Start-Button geklickt wurde
         if (frame.getMenuetafel().isStart_btn_is_clicked()) {
 
@@ -87,9 +94,10 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             int offsetY = ((getHeight() - board_height) / 2) - 50;
 
             // Wenn das Frame in den Vollbildmodus gebracht wird, soll repainted werden
-            if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
-                repaint();
-            }
+            // if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) ==
+            // JFrame.MAXIMIZED_BOTH) {
+            // repaint();
+            // }
 
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {

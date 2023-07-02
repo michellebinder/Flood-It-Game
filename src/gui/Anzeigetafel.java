@@ -11,7 +11,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import logic.Board;
@@ -47,6 +46,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 calculateFieldSize();
             }
         });
+
     }
 
     public void calculateFieldSize() {
@@ -75,6 +75,33 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
         repaint();
     }
 
+    public void calculateFieldSizeFullscreen() {
+
+        int width = getWidth();
+        int height = getHeight();
+
+        int minimum = Math.min(width, height);
+
+        // tatsächlich verfügbare höhe abzüglich der ränder
+        int available_height = height - 4 * 40;
+        // tatsächlich verfügbare breite abzüglich der ränder
+        int available_width = width - 2 * 40;
+
+        fieldSize = minimum / Math.max(frame.getMenuetafel().getSelected_num_of_rows() + 5,
+                frame.getMenuetafel().getSelected_num_of_cols() + 5);
+
+        // falls die größe des felds den zulässigen rahmen überschreitet wird sie
+        // angepasst
+        if (fieldSize > available_height / frame.getMenuetafel().getSelected_num_of_rows()
+                || fieldSize > available_width / frame.getMenuetafel().getSelected_num_of_cols()) {
+
+            fieldSize = Math.min(available_height / frame.getMenuetafel().getSelected_num_of_rows() + 5,
+                    available_width / frame.getMenuetafel().getSelected_num_of_cols() + 5);
+        }
+
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -92,12 +119,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             int offsetX = (getWidth() - board_width) / 2;
             int offsetY = ((getHeight() - board_height) / 2) - 50;
-
-            // Wenn das Frame in den Vollbildmodus gebracht wird, soll repainted werden
-            // if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) ==
-            // JFrame.MAXIMIZED_BOTH) {
-            // repaint();
-            // }
 
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {

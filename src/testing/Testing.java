@@ -1,3 +1,5 @@
+// Michelle Binder
+// 7345155
 package testing;
 /*
  * Siehe Hinweise auf dem Aufgabenblatt. 
@@ -14,8 +16,6 @@ public class Testing {
 
 	private Field[][] board;
 
-	// in testing ist die maximale anzahl an farben immer 6
-
 	private int rows;
 	private int cols;
 
@@ -24,7 +24,6 @@ public class Testing {
 		// vorgegeben
 		this.board = initBoard;
 
-		// neu hinzugefügt
 		rows = board.length;
 		cols = board[0].length;
 	}
@@ -33,12 +32,15 @@ public class Testing {
 	// nicht auf dem "Original" arbeiten müssen
 	private Field[][] copyBoard() {
 
+		int rows = board.length;
+		int cols = board[0].length;
+
 		Field[][] copied_board = new Field[rows][cols];
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				Field originalField = board[i][j];
-				Field copiedField = new Field(i, j, originalField.getColor());
-				copied_board[i][j] = copiedField;
+				Field field = board[i][j];
+				Field copied_field = new Field(field.getRow(), field.getCol(), field.getColor());
+				copied_board[i][j] = copied_field;
 			}
 		}
 		return copied_board;
@@ -263,15 +265,196 @@ public class Testing {
 		return chosen_color;
 	}
 
-	// s1 fängt an
-	// es ist möglich, innerhalb von höchstens moves vielen Zügen board so zu
-	// ändern, dass die Farbverteilung identisch zu der von anotherBoard ist.
-	// wenn der Wert 0 oder 1 oder 2 oder 3 gespeichert ist, false zurück gegeben
-	// wird.
-	// wenn der Wert 4 oder größer gespeichert ist, true zurück gegeben wird.
 	public boolean toBoard(Field[][] anotherBoard, int moves) {
 
+		// kopie von dem board erstellen, auf dem wir arbeiten können
+		Field[][] current_board = copyBoard();
+
+		ArrayList<Field> component_s1 = findComponentS1(current_board);
+		ArrayList<Field> component_s2 = findComponentS2(current_board);
+
+		ArrayList<Field> component_s1_another = findComponentS1(anotherBoard);
+		ArrayList<Field> component_s2_another = findComponentS2(anotherBoard);
+
+		// Fall 1: board und anotherboard sind gleich -> wir sind fertig
+		if (areBoardsEqual(current_board, anotherBoard)) {
+
+			return true;
+		}
+
+		// Fall 2: board und anotherboard haben eine unterschiedliche anzahl zeilen und
+		// spalten -> wir sind fertig
+		if (current_board.length != anotherBoard.length || current_board[0].length != anotherBoard[0].length) {
+
+			return false;
+		}
+
+		// Fall 3: die komponenten von s1 und s2 in board müssen <= der komponenten in
+		// anotherboard sein
+		if (!compareComponents(component_s1, component_s1_another)
+				|| !compareComponents(component_s2, component_s2_another)) {
+
+			return false;
+		}
+
+		// wenn keiner der vorherigen fälle eintritt -> board ist valide und wir können
+		// weitermachen
+		ArrayList<ArrayList<Integer>> permutations = createPermutations(moves);
+		boolean boards_are_equal = false;
+
+		for (List<Integer> permutation : permutations) {
+
+			if (runCurrentPermutation(permutation, anotherBoard)) {
+				boards_are_equal = true;
+				break;
+			}
+		}
+		return boards_are_equal;
+	}
+
+	public boolean runCurrentPermutation(List<Integer> permutation, Field[][] another_board) {
+
+		Field[][] current_board = copyBoard();
+		ArrayList<Field> component_s1 = findComponentS1(current_board);
+		ArrayList<Field> component_s2 = findComponentS2(current_board);
+
+		// erster zug: startfeld s1
+		int start_color_s1 = current_board[0][current_board[0].length - 1].getColor();
+		// zweiter zug: startfeld s2
+		int start_color_s2 = current_board[current_board.length - 1][0].getColor();
+
+		boolean boards_are_equal = false;
+		int count = 0;
+
+		// nur wenn das erste feld die startfarbe von s1 hat und das zweite die
+		// startfarbe von s2
+		if (permutation.size() <= 1
+				|| !(permutation.get(0) == start_color_s1 || permutation.get(0) == start_color_s2)
+						&& !(permutation.get(1) == start_color_s2) && !boards_are_equal) {
+
+			for (int i : permutation) {
+				// s1 ist dran
+				if (count % 2 == 0) {
+
+					// gehe alle felder durch, die in der komponente enthalten sind
+					for (int j = 0; j < component_s1.size(); j++) {
+						Field field = component_s1.get(j);
+						field.setColor(i);
+
+						// schau dir die nachbarn von dem aktuellen feld an
+						List<Field> neighbours = getNeighbors(field, current_board);
+						for (Field neighbour : neighbours) {
+
+							// füge den nachbarn zur komponente hinzu, falls
+							// - er nicht schon in der komponente drin ist
+							// - er die ausgewählte farbe hat
+							if (!component_s1.contains(current_board[neighbour.getRow()][neighbour.getCol()])
+									&& current_board[neighbour.getRow()][neighbour.getCol()].getColor() == i) {
+								neighbour.setColor(i);
+								component_s1.add(current_board[neighbour.getRow()][neighbour.getCol()]);
+								changeColorOfWholeComponent(component_s1, i);
+							}
+						}
+					}
+					count++;
+					// überprüfen, ob die boards jetzt gleich sind
+					if (areBoardsEqual(current_board, another_board)) {
+						// wenn ja aufhören, sonst weitermachen
+						boards_are_equal = true;
+						// return true;
+						break;
+					}
+				}
+				// s2 ist dran
+				else {
+					// Gehe alle Felder durch, die in der Komponente enthalten sind
+					for (int j = 0; j < component_s2.size(); j++) {
+						Field field = component_s2.get(j);
+						field.setColor(i);
+
+						// Schau dir die Nachbarn des aktuellen Feldes an
+						List<Field> neighbours = getNeighbors(field, current_board);
+						for (Field neighbour : neighbours) {
+							// Füge den Nachbarn zur Komponente hinzu, falls
+							// - er nicht schon in der Komponente enthalten ist
+							// - er die ausgewählte Farbe hat
+							if (!component_s2.contains(current_board[neighbour.getRow()][neighbour.getCol()])
+									&& current_board[neighbour.getRow()][neighbour.getCol()].getColor() == i) {
+								neighbour.setColor(i);
+								component_s2.add(current_board[neighbour.getRow()][neighbour.getCol()]);
+							} else if (component_s1.get(0).getColor() != i) {
+								changeColorOfWholeComponent(component_s2, i);
+							}
+						}
+					}
+
+					count++;
+
+					if (areBoardsEqual(current_board, another_board)) {
+						// wenn ja aufhören, sonst weitermachen
+						boards_are_equal = true;
+						return true;
+					}
+				}
+			}
+		}
 		return false;
+	}
+
+	public void changeColorOfWholeComponent(ArrayList<Field> component, int selected_color) {
+
+		for (Field f : component) {
+			f.setColor(selected_color);
+		}
+	}
+
+	// generiert alle permutationen, die als moves-abfolge von s1 und s2
+	// potenziell genutzt werden können
+	public static ArrayList<ArrayList<Integer>> createPermutations(int moves) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+		createPermutationsHelper(moves, new ArrayList<>(), -1, -1, result);
+		return result;
+	}
+
+	// checkt, ob alle bedingungen bei einer permutation erfüllt sind
+	private static void createPermutationsHelper(int remaining_moves,
+			ArrayList<Integer> current_move,
+			int last_move_s1, int last_move_s2, ArrayList<ArrayList<Integer>> result) {
+
+		// wenn die anzahl züge abgearbeitet wurde
+		if (remaining_moves == 0) {
+			result.add(new ArrayList<>(current_move));
+			return;
+		}
+
+		// gehe die farben von 1-6 durch
+		for (int i = 1; i <= 6; i++) {
+			// current_move ist zu beginn 0, d.h. s1 ist dran wenn es eine gerade zahl ist
+			if (current_move.size() % 2 == 0) {
+				// wenn die farbe valide ist
+				// - nicht die letzte farbe von s1
+				// - nicht die letzte farbe von s2
+				// füge sie hinzu
+				if (i != last_move_s1 && i != last_move_s2) {
+					current_move.add(i);
+					createPermutationsHelper(remaining_moves - 1, current_move, i, last_move_s2,
+							result);
+					current_move.remove(current_move.size() - 1);
+				}
+				// s2 ist dran wenn es eine ungerade zahl ist
+			} else {
+				// wenn die farbe valide ist
+				// - nicht die letzte farbe von s1
+				// - nicht die letzte farbe von s2
+				// füge sie hinzu
+				if (i != last_move_s1 && i != last_move_s2) {
+					current_move.add(i);
+					createPermutationsHelper(remaining_moves - 1, current_move, last_move_s1, i,
+							result);
+					current_move.remove(current_move.size() - 1);
+				}
+			}
+		}
 	}
 
 	public int minMoves(int row, int col) {
@@ -303,7 +486,7 @@ public class Testing {
 
 				// komponente von s1 im aktuellen board
 				ArrayList<Field> component_s1 = findComponentS1(current_board);
-				int current_color = i;
+				int current_color = i + 1;
 
 				// solange die komponente das gesuchte feld noch nicht enthält
 				while (!component_s1.contains(current_board[row][col])) {
@@ -337,8 +520,8 @@ public class Testing {
 
 	public int minMovesFull() {
 
-		// zunächst so hoch setzen, das es auf jeden fall von den anzahl zügen abgelöst
-		// wird
+		// zunächst so hoch setzen, das es auf jeden fall von der anzahl an zügen
+		// abgelöst wird
 		int min_moves = Integer.MAX_VALUE;
 		int num_of_moves = 0;
 		int[] num_of_moves_per_startcolor = new int[6];
@@ -369,7 +552,7 @@ public class Testing {
 
 				// komponente von s1 im aktuellen board
 				ArrayList<Field> component_s1 = findComponentS1(current_board);
-				int current_color = i;
+				int current_color = i + 1;
 
 				// solange s1 noch nicht das ganze feld eingenommen hat mit der aktuellen farbe
 				while (component_s1.size() != rows * cols) {
@@ -431,14 +614,33 @@ public class Testing {
 		return updatedComponent;
 	}
 
-	// Hilfsmethode die ein board auf der konsole ausgibt
-	public void printBoard(Field[][] currentboard) {
-		for (int i = 0; i < currentboard.length; i++) {
-			for (int j = 0; j < currentboard[0].length; j++) {
-				System.out.print(currentboard[i][j].getColor() + " ");
+	public ArrayList<Field> makeMoveS2(ArrayList<Field> component, int selected_color, Field[][] currentBoard) {
+
+		// kopie von der komponente, an der die änderungen vorgenommen werden
+		ArrayList<Field> updatedComponent = new ArrayList<>(component);
+
+		// gehe alle felder durch, die in der komponente enthalten sind
+		for (int i = 0; i < updatedComponent.size(); i++) {
+			Field field = updatedComponent.get(i);
+			field.setColor(selected_color);
+
+			// schau dir die nachbarn von dem aktuellen feld an
+			List<Field> neighbours = getNeighbors(field, currentBoard);
+			for (Field neighbour : neighbours) {
+
+				// füge den nachbarn zur komponente hinzu, falls
+				// - er nicht schon in der komponente drin ist
+				// - er die ausgewählte farbe hat
+				if (!updatedComponent.contains(currentBoard[neighbour.getRow()][neighbour.getCol()])
+						&& currentBoard[neighbour.getRow()][neighbour.getCol()].getColor() == selected_color) {
+					neighbour.setColor(selected_color);
+
+					updatedComponent.add(currentBoard[neighbour.getRow()][neighbour.getCol()]);
+
+				}
 			}
-			System.out.println();
 		}
+		return updatedComponent;
 	}
 
 	public ArrayList<Field> findComponentS1(Field[][] spielbrett) {
@@ -470,13 +672,11 @@ public class Testing {
 				}
 			}
 		}
-
 		componentS1 = updatedComponent;
-
 		return componentS1;
 	}
 
-	private ArrayList<Field> findComponentS2(Field[][] spielbrett) {
+	public ArrayList<Field> findComponentS2(Field[][] spielbrett) {
 
 		ArrayList<Field> componentS2 = new ArrayList<>();
 		int colorS2;
@@ -586,11 +786,6 @@ public class Testing {
 			}
 		}
 		return num_of_color_occurence;
-
-		// for (int i = 0; i < num_of_color_occurence.length; i++) {
-		// System.out.println("color: " + i + " num of occ: " +
-		// num_of_color_occurence[i]);
-		// }
 	}
 
 	// Hilfsmethode: findet raus, wie oft die nachbarn der komponente von s1 jeweils
@@ -615,6 +810,48 @@ public class Testing {
 			}
 		}
 		return num_of_color_occurence;
+	}
+
+	// Methode zum Vergleichen der Farben von zwei Boards
+	public boolean areBoardsEqual(Field[][] board, Field[][] anotherboard) {
+
+		// Durch jedes Feld iterieren und die Farben vergleichen
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[i].length; j++) {
+				// Wenn die Farben nicht übereinstimmen, gebe false zurück
+				if (board[i][j].getColor() != anotherboard[i][j].getColor()) {
+					return false;
+				}
+			}
+		}
+
+		// Wenn alle Farben übereinstimmen, gebe true zurück
+		return true;
+	}
+
+	// Methode zum Vergleichen der Komponenten in den Boards
+	public static boolean compareComponents(ArrayList<Field> component, ArrayList<Field> another_component) {
+
+		for (Field f : component) {
+
+			boolean belongs_to_another = false;
+			int row_component = f.getRow();
+			int col_component = f.getCol();
+
+			for (Field f_another : another_component) {
+
+				int row_another_component = f_another.getRow();
+				int col_another_component = f_another.getCol();
+
+				if (row_component == row_another_component && col_component == col_another_component) {
+					belongs_to_another = true;
+				}
+			}
+			if (!belongs_to_another) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/*

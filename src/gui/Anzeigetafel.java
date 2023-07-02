@@ -79,9 +79,9 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             /******** LEGENDE *********/
 
             legend_field_size = Math.min(fieldSize * frame.getMenuetafel().getSelected_num_of_rows(),
-                    fieldSize * frame.getMenuetafel().getSelected_num_of_rows()) / 10;
+                    fieldSize * frame.getMenuetafel().getSelected_num_of_rows()) / 12;
 
-            int legend_start_x = offsetX;
+            int legend_start_x = 25;
             int legend_start_y = offsetY + (frame.getMenuetafel().getSelected_num_of_rows() + 1) * fieldSize;
 
             ArrayList<Color> selectedColors = board.getSelectedColors();

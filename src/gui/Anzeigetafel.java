@@ -1,3 +1,6 @@
+// Michelle Binder
+// 7345155
+
 package gui;
 
 import java.awt.Color;

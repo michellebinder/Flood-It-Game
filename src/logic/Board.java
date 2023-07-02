@@ -1,4 +1,5 @@
-
+// Michelle Binder
+// 7345155
 package logic;
 
 import java.awt.Color;
@@ -181,26 +182,6 @@ public class Board {
             is_start_klar = true;
         } else {
             is_start_klar = false;
-        }
-    }
-
-    private void printComponent1() {
-        for (int i = 0; i < component_player_1.size(); i++) {
-            int row = component_player_1.get(i).getRow();
-            int col = component_player_1.get(i).getCol();
-            int color = component_player_1.get(i).getColor();
-            System.out.println("comp p1: (" + row + "," + col + "), color: " + color);
-            System.out.println();
-        }
-    }
-
-    private void printComponent2() {
-        for (Field f : component_player_2) {
-            int row = f.getRow();
-            int col = f.getCol();
-            int color = f.getColor();
-            System.out.println("comp p2: (" + row + "," + col + "), color: " + color);
-            System.out.println("end");
         }
     }
 

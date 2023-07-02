@@ -49,6 +49,8 @@ public class Menuetafel extends JPanel {
     private JLabel component_size_s2;
 
     private Timer timer;
+    private Timer timer2;
+
     private int elapsedTime;
     private JLabel time_lbl;
     private JLabel timer_lbl;
@@ -152,14 +154,13 @@ public class Menuetafel extends JPanel {
                     // wenn s2 als erster spieler ausgewählt wird dann starte dessen move
                     if (frame.getAnzeigetafel().getBoard().isP2_ist_dran()) {
                         // mit 1 sek verzögerung
-                        timer = new Timer(1000, a -> {
+                        timer2 = new Timer(1000, a -> {
                             frame.getAnzeigetafel().getBoard()
                                     .makeMoveS2(frame.getMenuetafel().getSelected_pc_strategy());
-                            timer.stop();
+                            timer2.stop();
                         });
-                        timer.setRepeats(false);
-                        timer.start();
-
+                        timer2.setRepeats(false);
+                        timer2.start();
                     }
                     updateComponentSizeLabels();
                     startTimer();
@@ -580,4 +581,13 @@ public class Menuetafel extends JPanel {
     public void setLine(LineBorder line) {
         this.line = line;
     }
+
+    public Timer getTimer2() {
+        return timer2;
+    }
+
+    public void setTimer2(Timer timer2) {
+        this.timer2 = timer2;
+    }
+
 }

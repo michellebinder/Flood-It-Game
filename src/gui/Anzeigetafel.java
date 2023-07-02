@@ -61,7 +61,17 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                     height / frame.getMenuetafel().getSelected_num_of_rows());
 
             int offsetX = (this.getWidth() - fieldSize * frame.getMenuetafel().getSelected_num_of_cols()) / 2;
-            int offsetY = (this.getHeight() - (fieldSize * (frame.getMenuetafel().getSelected_num_of_rows() + 2))) / 2;
+            int offsetY = Math.max(25,
+                    (this.getHeight() - (fieldSize * (frame.getMenuetafel().getSelected_num_of_rows() + 2))) / 2);
+
+            int legend_start_y;
+
+            if (offsetY == 25) {
+                legend_start_y = offsetY + frame.getMenuetafel().getSelected_num_of_rows() * fieldSize
+                        + (int) 0.5 * fieldSize + 10;
+            } else {
+                legend_start_y = offsetY + (frame.getMenuetafel().getSelected_num_of_rows() + 1) * fieldSize + 10;
+            }
 
             // Zeichnen der felder
             for (int i = 0; i < frame.getMenuetafel().getSelected_num_of_rows(); i++) {
@@ -81,10 +91,8 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
 
             /******** LEGENDE *********/
 
-            legend_field_size = (getWidth() - frame.getMenuetafel().getSelected_num_of_colors() * 5) / 10;
-
-            int legend_start_x = 25;
-            int legend_start_y = offsetY + (frame.getMenuetafel().getSelected_num_of_rows() + 1) * fieldSize;
+            legend_field_size = Math.min(height, width) / 15;
+            int legend_start_x = offsetX;
 
             ArrayList<Color> selectedColors = board.getSelectedColors();
 

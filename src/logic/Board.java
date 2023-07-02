@@ -681,6 +681,8 @@ public class Board {
         input = JOptionPane.showConfirmDialog(null,
                 "Das Spiel ist vorbei. " + pop_up_text, "Game over", JOptionPane.DEFAULT_OPTION);
         if (input == 0) {
+            component_player_1.clear();
+            component_player_2.clear();
             frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
             frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         }
@@ -691,8 +693,6 @@ public class Board {
         frame.getMenuetafel().getPlay_btn().setText("Play");
         frame.getMenuetafel().setPlay_btn_is_clicked(false);
         frame.getMenuetafel().enable_buttons();
-        // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
-        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
         frame.getMenuetafel().pauseTimer();
         frame.getMenuetafel().setElapsedTime(0);
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
@@ -712,6 +712,8 @@ public class Board {
         input = JOptionPane.showConfirmDialog(null,
                 "Das Spiel ist vorbei. Gleichstand.", "Game over", JOptionPane.DEFAULT_OPTION);
         if (input == 0) {
+            component_player_1.clear();
+            component_player_2.clear();
             frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
             frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
         }

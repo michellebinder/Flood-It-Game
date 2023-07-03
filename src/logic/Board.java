@@ -683,9 +683,9 @@ public class Board {
         if (input == 0) {
             component_player_1.clear();
             component_player_2.clear();
-            frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
-            frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
+            frame.getMenuetafel().resetComponentSizeLabels();
         }
+        frame.getMenuetafel().resetComponentSizeLabels();
         frame.getMenuetafel().getStart_btn().setText("Start");
         frame.getMenuetafel().setStart_btn_is_clicked(false);
         frame.getMenuetafel().setStart_btn_value("Start");
@@ -698,12 +698,8 @@ public class Board {
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
         component_player_1.clear();
         component_player_2.clear();
-        frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
-        frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
-
         frame.getMenuetafel().repaint();
         frame.getAnzeigetafel().repaint();
-
     }
 
     private void showPopUpAfter4InvalidMoves() {
@@ -714,8 +710,7 @@ public class Board {
         if (input == 0) {
             component_player_1.clear();
             component_player_2.clear();
-            frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
-            frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
+            frame.getMenuetafel().resetComponentSizeLabels();
         }
         // behavour of menue panel
         frame.getMenuetafel().getStart_btn().setText("Start");
@@ -725,18 +720,15 @@ public class Board {
         frame.getMenuetafel().getPlay_btn().setText("Play");
         frame.getMenuetafel().setPlay_btn_is_clicked(false);
         frame.getMenuetafel().enable_buttons();
-        // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
-        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
         frame.getMenuetafel().pauseTimer();
         frame.getMenuetafel().setElapsedTime(0);
         frame.getMenuetafel().getTime_lbl().setText("00:00:00");
 
-        frame.getAnzeigetafel().repaint();
         component_player_1.clear();
         component_player_2.clear();
-        frame.getMenuetafel().getComponent_size_s1().setText("Komponentengröße S1: 0");
-        frame.getMenuetafel().getComponent_size_s2().setText("Komponentengröße S2: 0");
+        frame.getMenuetafel().resetComponentSizeLabels();
         frame.getMenuetafel().repaint();
+        frame.getAnzeigetafel().repaint();
 
     }
 

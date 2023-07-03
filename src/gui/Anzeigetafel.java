@@ -67,6 +67,7 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
             int legend_start_y;
 
             if (offsetY == 25) {
+
                 legend_start_y = offsetY + frame.getMenuetafel().getSelected_num_of_rows() * fieldSize
                         + (int) 0.5 * fieldSize + 10;
             } else {
@@ -127,19 +128,6 @@ public class Anzeigetafel extends JPanel implements MouseListener, KeyListener {
                 super.paintComponent(g);
             }
 
-            if (board.isP1_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
-                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Du bist dran");
-            } else if (board.isP2_ist_dran() &&
-                    frame.getMenuetafel().isPlay_btn_is_clicked()) {
-                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Der Computer ist dran");
-            }
-            if (board.isIs_game_over()) {
-                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
-            }
-            if (board.getInput() == 0) {
-                frame.getMenuetafel().resetComponentSizeLabels();
-                frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
-            }
         } else {
             // wenn auf Stop geklickt wird soll das Board wieder verschwinden
             super.paintComponent(g);

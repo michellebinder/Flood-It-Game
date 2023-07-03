@@ -115,7 +115,6 @@ public class Menuetafel extends JPanel {
                     start_btn_is_clicked = true;
                     start_btn.setText("Stop");
                     start_btn_value = "Stop";
-                    resetComponentSizeLabels();
 
                     // sobald start geklickt wird, wird dem board übergeben wer anfangen soll
                     if (selected_starting_player.equals("S2 beginnt")) {
@@ -125,17 +124,17 @@ public class Menuetafel extends JPanel {
                         frame.getAnzeigetafel().getBoard().setP1_ist_dran(true);
                         frame.getAnzeigetafel().getBoard().setP2_ist_dran(false);
                     }
+                    resetComponentSizeLabels();
                     frame.getAnzeigetafel().repaint();
                 } else {
                     // If the Stop button is clicked, change its text to "Start"
                     start_btn.setText("Start");
                     start_btn_is_clicked = false;
-                    resetComponentSizeLabels();
+
                     start_btn_value = "Start";
                     elapsedTime = 0;
                     updateTimerLabel();
-                    // label wer dran ist entfernen sobald stop gedrückt wird und board verschwindet
-                    frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("");
+                    resetComponentSizeLabels();
                     frame.getAnzeigetafel().repaint();
                 }
                 setFocusable(true);
@@ -164,14 +163,6 @@ public class Menuetafel extends JPanel {
                     }
                     updateComponentSizeLabels();
                     startTimer();
-                    // beschriftung wer dran ist
-                    // -> erscheint erst wenn start & play gedrückt wurde
-                    // -> verschwindet wieder wenn spiel vorbei ist
-                    if (board.isP1_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
-                        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Du bist dran");
-                    } else if (board.isP2_ist_dran() && frame.getMenuetafel().isPlay_btn_is_clicked()) {
-                        frame.getAnzeigetafel().getCurrent_player_anzeige_lbl().setText("Der Computer ist dran");
-                    }
                     frame.getAnzeigetafel().requestFocusInWindow();
                     frame.getAnzeigetafel().requestFocus();
 

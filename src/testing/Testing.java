@@ -457,7 +457,7 @@ public class Testing {
 		}
 	}
 
-	public int minMoves(int row, int col) {
+	public int minMoves(int x, int y) {
 
 		// zunächst so hoch setzen, das es auf jeden fall von den anzahl zügen abgelöst
 		// wird
@@ -470,7 +470,7 @@ public class Testing {
 		ArrayList<Field> comp_s1 = findComponentS1(board);
 
 		// Fall 1: das gesuchte feld ist bereits in der komponente enthalten
-		if (comp_s1.contains(board[row][col])) {
+		if (comp_s1.contains(board[x][y])) {
 			return 0;
 		}
 
@@ -489,7 +489,7 @@ public class Testing {
 				int current_color = i + 1;
 
 				// solange die komponente das gesuchte feld noch nicht enthält
-				while (!component_s1.contains(current_board[row][col])) {
+				while (!component_s1.contains(current_board[x][y])) {
 
 					// mach einen move
 					component_s1 = makeMoveS1(component_s1, current_color, current_board);

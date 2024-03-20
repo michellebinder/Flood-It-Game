@@ -1,6 +1,6 @@
 # Beschreibung
 
-Dieses Projekt ist eine Implementierung des beliebten Puzzlespiels "Flood It" in Java, entwickelt als Teil des Programmierpraktikums im Rahmen meines Studiums. Ziel des Spiels ist es, das gesamte Spielfeld in einer einzigen Farbe zu "überfluten", indem man die Farbe des Startfelds schrittweise ändert, sodass benachbarte Felder derselben Farbe in die Auswahl aufgenommen werden. Dabei wird gegen den Computer gespielt. 
+Dieses Projekt ist eine Implementierung des beliebten Spiels "Flood It" in Java, entwickelt als Teil des Programmierpraktikums im Rahmen meines Studiums. Ziel des Spiels ist es, das gesamte Spielfeld in einer einzigen Farbe zu "überfluten", indem man die Farbe des Startfelds schrittweise ändert, sodass benachbarte Felder derselben Farbe in die Auswahl aufgenommen werden. Dabei wird gegen den Computer gespielt. 
 
 # Paketstruktur
 

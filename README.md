@@ -6,7 +6,18 @@ Dieses Projekt ist eine Implementierung des beliebten Spiels "Flood It" in Java,
 
 Das Projekt ist in vier Hauptpakete unterteilt:
 
-*1. start:* Enthält die Klasse Start.java, die die main-Methode zum Starten des Spiels beinhaltet.
-*2. testing:* Beinhaltet die Klasse Testing.java, in der verschiedene Testfälle implementiert sind, die bei der Korrektur des Codes automatisiert aufgerufen wurden.
-*3. gui:* Verantwortlich für die grafische Benutzeroberfläche des Spiels.
-*4. logic:* Enthält die Kernlogik des Spiels.
+## 1. start
+
+Enthält die Klasse Start.java, die die main-Methode zum Starten des Spiels beinhaltet.
+
+## 2. testing
+
+Beinhaltet die Klasse Testing.java, in der verschiedene Testfälle implementiert sind, die bei der Korrektur des Codes automatisiert aufgerufen wurden.
+
+## 3. gui
+
+Verantwortlich für die grafische Benutzeroberfläche des Spiels.
+
+## 4. logic
+
+Enthält die Kernlogik des Spiels.
